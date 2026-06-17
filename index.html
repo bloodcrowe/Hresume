@@ -1762,7 +1762,10 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 
       <!-- Summary -->
       <div>
-        <div class="rb-section-title">Professional Summary</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <div class="rb-section-title" style="margin:0;border:0;padding:0;">Professional Summary</div>
+          <button onclick="aiSummaryWriter()" id="rb-summary-ai-btn" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(124,106,255,.4);background:rgba(124,106,255,.08);color:var(--accent2);cursor:pointer;font-family:var(--font-body);">✦ AI Summary</button>
+        </div>
         <textarea class="rb-textarea" id="rb-summary" placeholder="Brief overview of your experience, skills, and what you bring to clients..." oninput="renderPreview()"></textarea>
       </div>
 
@@ -6787,6 +6790,50 @@ async function aiJobTitleWriter() {
     showToast('Could not generate title. Try again.');
   } finally {
     if (btn) { btn.textContent = '✦ AI Title'; btn.disabled = false; }
+  }
+}
+
+async function aiSummaryWriter() {
+  const btn = document.getElementById('rb-summary-ai-btn');
+  const summaryInput = document.getElementById('rb-summary');
+  const data = getResumeData();
+  const hasExperience = (data.experiences || []).some(e => e.company || e.role || e.desc);
+  if (!hasExperience && !data.skills.length && !data.title) {
+    showToast('Add experience, skills, or a title first.');
+    return;
+  }
+
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+  try {
+    const experienceText = (data.experiences || []).filter(e => e.company || e.role || e.desc).map(e => {
+      return [
+        [e.role, e.company].filter(Boolean).join(' at '),
+        [e.start, e.end].filter(Boolean).join(' - '),
+        e.desc
+      ].filter(Boolean).join('\n');
+    }).join('\n\n');
+
+    const resumeContext = [
+      data.title ? 'TARGET TITLE:\n' + data.title : '',
+      data.summary ? 'CURRENT SUMMARY:\n' + data.summary : '',
+      data.skills.length ? 'SKILLS:\n' + data.skills.join(', ') : '',
+      experienceText ? 'EXPERIENCE:\n' + experienceText : ''
+    ].filter(Boolean).join('\n\n');
+
+    const sys = 'You are an expert resume writer. Write one professional summary for the resume using only the provided context. Make it 3-4 sentences, ATS-friendly, credible, and human-sounding. Emphasize the candidate’s strongest supported experience, domain, and transferable strengths. Do not invent metrics, employers, certifications, degrees, seniority, or tools. Do not use placeholders, brackets, first person, bullets, hype, or generic filler. Return only the summary paragraph.';
+    const result = await callAI('Rewrite the professional summary for this resume:\n\n' + resumeContext.slice(0, 5500), sys);
+    const cleanSummary = cleanResumeSentenceSpacing(result.replace(/^["'\s]+|["'\s]+$/g, '').replace(/\n+/g, ' ').trim());
+    if (!cleanSummary || cleanSummary.length < 40) throw new Error('No summary returned');
+    if (hasUnresolvedNumberPlaceholders(cleanSummary) || /\[[^\]]+\]/.test(cleanSummary)) throw new Error('Summary contains placeholder');
+    if (summaryInput) summaryInput.value = cleanSummary;
+    clearResumeScore();
+    renderPreview();
+    showToast('AI summary updated!');
+  } catch(e) {
+    console.error('aiSummaryWriter error:', e);
+    showToast('Could not generate summary. Try again.');
+  } finally {
+    if (btn) { btn.textContent = '✦ AI Summary'; btn.disabled = false; }
   }
 }
 
