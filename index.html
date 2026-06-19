@@ -5053,6 +5053,100 @@ function buildResumeHTML(data, style) {
   }
 
 
+  // ── ATS CLASSIC 2 ──
+  if(style==='classic2') {
+    var titleColor = '#17365d';
+    var ruleColor  = '#000';
+
+    // Header
+    var contactLine2 = [
+      data.location ? data.location : '',
+      data.phone    ? data.phone    : '',
+      data.email    ? data.email    : '',
+      data.website  ? data.website  : ''
+    ].filter(Boolean).join('  |  ');
+
+    // Skills: two-column bullet grid
+    var c2skills = (data.skills || []).filter(Boolean);
+    var c2skillsHTML = '';
+    if (c2skills.length) {
+      var half = Math.ceil(c2skills.length / 2);
+      var col1 = c2skills.slice(0, half);
+      var col2 = c2skills.slice(half);
+      var maxRows = Math.max(col1.length, col2.length);
+      var rows = '';
+      for (var ri = 0; ri < maxRows; ri++) {
+        rows += '<tr>' +
+          '<td style="padding:1px 6px 1px 0;font-size:12.5px;color:#000;vertical-align:top;width:50%;">' +
+            (col1[ri] ? '• ' + escapeResumeHTML(col1[ri]) : '') +
+          '</td>' +
+          '<td style="padding:1px 0 1px 6px;font-size:12.5px;color:#000;vertical-align:top;width:50%;">' +
+            (col2[ri] ? '• ' + escapeResumeHTML(col2[ri]) : '') +
+          '</td>' +
+        '</tr>';
+      }
+      c2skillsHTML = '<table style="width:100%;border-collapse:collapse;margin-top:4px;">' + rows + '</table>';
+    }
+
+    // Summary
+    var c2summary = data.summary
+      ? '<div style="font-size:12.5px;color:#000;line-height:1.5;margin-top:4px;">' + escapeResumeHTML(cleanResumeSentenceSpacing(data.summary)) + '</div>'
+      : '';
+
+    // Experience
+    var c2exp = data.experiences.filter(function(e){ return e.company || e.role; }).map(function(e) {
+      var bullets = renderResumeDescHTML(e.desc, 'font-size:12px;color:#000;line-height:1.45;margin-bottom:3px;');
+      var dateStr = [e.start, e.end || 'Present'].filter(Boolean).join(' – ');
+      return '<div style="margin-bottom:16px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+          '<span style="font-size:13.5px;font-weight:700;color:#000;">' + escapeResumeHTML(e.company || '') + '</span>' +
+          '<span style="font-size:12px;color:#000;">' + escapeResumeHTML(e.location || '') + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">' +
+          '<span style="font-size:12.5px;font-style:italic;color:#000;">' + escapeResumeHTML(e.role || '') + '</span>' +
+          '<span style="font-size:12px;color:#000;">' + escapeResumeHTML(dateStr) + '</span>' +
+        '</div>' +
+        bullets +
+      '</div>';
+    }).join('');
+
+    // Education
+    var c2edu = data.educations.filter(function(e){ return e.school || e.degree; }).map(function(e) {
+      var dateStr = [e.start, e.end].filter(Boolean).join(' – ');
+      return '<div style="margin-bottom:10px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+          '<span style="font-size:13.5px;font-weight:700;color:#000;">' + escapeResumeHTML(e.school || '') + '</span>' +
+          '<span style="font-size:12px;color:#000;">' + escapeResumeHTML(e.location || '') + '</span>' +
+        '</div>' +
+        (e.degree ? '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+          '<span style="font-size:12.5px;font-style:italic;color:#000;">' + escapeResumeHTML(e.degree) + '</span>' +
+          '<span style="font-size:12px;color:#000;">' + escapeResumeHTML(dateStr) + '</span>' +
+        '</div>' : '') +
+      '</div>';
+    }).join('');
+
+    function c2section(title, content) {
+      if (!content) return '';
+      return '<div style="margin-bottom:16px;">' +
+        '<div style="font-size:13.5px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #000;padding-bottom:2px;margin-bottom:6px;">' + title + '</div>' +
+        content +
+      '</div>';
+    }
+
+    return '<div class="' + cls + '" style="font-family:Calibri,Arial,sans-serif;color:#000;background:#fff;padding:28px 32px;">' +
+      '<div style="text-align:center;margin-bottom:16px;">' +
+        (data.name ? '<div style="font-size:26px;font-weight:700;color:' + titleColor + ';letter-spacing:.02em;line-height:1.2;">' + escapeResumeHTML(data.name) + '</div>' : '') +
+        (data.title ? '<div style="font-size:13px;font-weight:600;color:#000;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">' + escapeResumeHTML(data.title) + '</div>' : '') +
+        (contactLine2 ? '<div style="font-size:12px;color:#000;margin-top:4px;line-height:1.4;">' + escapeResumeHTML(contactLine2) + '</div>' : '') +
+      '</div>' +
+      '<div style="border-top:2px solid #000;margin-bottom:14px;"></div>' +
+      (c2summary ? c2section('Summary', c2summary) : '') +
+      (c2skillsHTML ? c2section('Skills & Tools', c2skillsHTML) : '') +
+      (c2exp ? c2section('Experience', c2exp) : '') +
+      (c2edu ? c2section('Education', c2edu) : '') +
+    '</div>';
+  }
+
   // ── EXECUTIVE ──
   if(style==='executive') {
     var expH=mkExp(), eduH=mkEdu(), skH=mkSkills();
@@ -5415,6 +5509,7 @@ function buildResumeHTML(data, style) {
 
 const TEMPLATE_STYLES = [
   {key:'classic',label:'Classic',icon:'◉'},
+  {key:'classic2',label:'ATS Classic 2',icon:'◉'},
   {key:'ats',label:'ATS Safe',icon:'✔'},
   {key:'modern',label:'Modern',icon:'✦'},
   {key:'professional',label:'Professional',icon:'📋'},
@@ -5547,7 +5642,7 @@ function downloadResumePDF() {
   const data = getResumeData();
   if (!data.name) { showToast('Add your name first.'); return; }
   if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
-  if (rbStyle === 'classic') { exportClassicResumePDF(data); return; }
+  if (rbStyle === 'classic' || rbStyle === 'classic2') { exportClassicResumePDF(data); return; }
   exportTemplateResumePDF(data);
 }
 
@@ -6974,7 +7069,7 @@ async function exportImprovedResume() {
   if (checkOptimizerPlaceholders(text).length) { showToast('Fill in all placeholder details before exporting.'); return; }
   const data = await parseOptimizedResumeText(text);
   if (!data) return;
-  if (rbStyle === 'classic') exportClassicResumePDF(data);
+  if (rbStyle === 'classic' || rbStyle === 'classic2') exportClassicResumePDF(data);
   else exportTemplateResumePDF(data);
 }
 
@@ -7248,7 +7343,7 @@ async function downloadResumeDOCX() {
   if (!data.name) { showToast('Add your name first.'); return; }
   if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
   if (typeof JSZip === 'undefined') { showToast('Word export library is still loading. Try again in a moment.'); return; }
-  if (rbStyle === 'classic') { await downloadClassicResumeDOCX(data); return; }
+  if (rbStyle === 'classic' || rbStyle === 'classic2') { await downloadClassicResumeDOCX(data); return; }
 
   const esc = (v) => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const para = (text, opts = {}) => {
