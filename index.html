@@ -2082,8 +2082,11 @@ function handleAgencyCheckout() {
           <button class="bullet-style-btn" data-style="dash" onclick="selectBulletStyle(this,'opt')">– Dashes</button>
           <button class="bullet-style-btn" data-style="none" onclick="selectBulletStyle(this,'opt')">None</button>
         </div>
-        <div style="margin:10px 0 6px;font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">Download Template</div>
-        <select class="rb-input" id="optTemplateSelect" onchange="setOptimizeTemplate(this.value)" style="margin-bottom:14px;"></select>
+        <div style="margin:10px 0 6px;font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">Template Style</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
+          <select class="rb-input" id="optTemplateSelect" onchange="setOptimizeTemplate(this.value)" style="flex:1;"></select>
+          <button onclick="saveOptimizedResume()" style="white-space:nowrap;padding:8px 14px;border-radius:8px;border:1px solid rgba(96,165,250,.35);background:rgba(96,165,250,.1);color:#60a5fa;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">💾 Save to My Resumes</button>
+        </div>
         <input type="hidden" id="optBulletStyle" value="bullet">
         <button class="opt-run-btn" id="optRunBtn" onclick="runOptimizer()">🔍 Analyze &amp; Optimize My Resume</button>
       </div>
