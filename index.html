@@ -2612,7 +2612,16 @@ function handleAgencyCheckout() {
         <div class="opt-panel">
           <div class="opt-section-title">Setup</div>
           <div class="rb-field" style="margin-bottom:10px;"><label class="rb-label">Target Role</label><input class="rb-input" id="iv-role" placeholder="e.g. Senior React Developer, UX Designer..."></div>
-          <div class="rb-field" style="margin-bottom:10px;"><label class="rb-label">Your Resume / Experience (optional)</label><textarea class="rb-textarea" id="iv-resume" placeholder="Paste your resume or a quick summary of your experience..." style="min-height:100px;"></textarea></div>
+          <div class="rb-field" style="margin-bottom:10px;">
+            <label class="rb-label">Your Resume / Experience (optional)</label>
+            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+              <select class="rb-input" id="ivLoadSelect" style="flex:1;">
+                <option value="">Load from My Resumes...</option>
+              </select>
+              <button class="rb-download-btn" onclick="loadSavedResumeIntoInterview('iv-resume','ivLoadSelect')" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+            </div>
+            <textarea class="rb-textarea" id="iv-resume" placeholder="Paste your resume or a quick summary of your experience..." style="min-height:100px;"></textarea>
+          </div>
           <div class="rb-field" style="margin-bottom:10px;"><label class="rb-label">Interview Type</label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
               <button class="rb-style-btn selected" id="ivtype-general" onclick="setIvType('general',this)">General</button>
@@ -2660,6 +2669,12 @@ function handleAgencyCheckout() {
     <div class="opt-layout">
       <div class="opt-panel">
         <div class="opt-section-title">Your Profile</div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+          <select class="rb-input" id="sgLoadSelect" style="flex:1;">
+            <option value="">Load from My Resumes...</option>
+          </select>
+          <button class="rb-download-btn" onclick="loadSavedResumeIntoInterview('sg-resume','sgLoadSelect')" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+        </div>
         <textarea class="rb-textarea" id="sg-resume" placeholder="Paste your resume, skills, or experience here..." style="min-height:160px;margin-bottom:10px;"></textarea>
         <div class="opt-section-title">Target Job or Industry</div>
         <textarea class="rb-textarea" id="sg-job" placeholder="Paste a job description, or just describe what you're targeting (e.g. 'Senior UX Designer at a fintech startup')..." style="min-height:120px;margin-bottom:10px;"></textarea>
@@ -5906,6 +5921,7 @@ function confirmSaveOptimizedResume() {
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
   renderJobMatchLoadOptions();
+  renderInterviewLoadOptions();
   closeModal();
   _saveOptData = null;
   showToast('Saved: ' + name);
@@ -6499,6 +6515,28 @@ function renderJobMatchLoadOptions() {
   }).join('');
 }
 
+function renderInterviewLoadOptions() {
+  const saved = getSavedResumes();
+  const opts = '<option value="">Load from My Resumes...</option>' + saved.map(r => {
+    return '<option value="' + r.id + '">' + escapeResumeHTML(r.name || 'Saved Resume') + '</option>';
+  }).join('');
+  ['ivLoadSelect','sgLoadSelect'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+function loadSavedResumeIntoInterview(textareaId, selectId) {
+  const select = document.getElementById(selectId);
+  if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
+  const saved = getSavedResumes();
+  const r = saved.find(s => Number(s.id) === Number(select.value));
+  if (!r || !r.data) { showToast('Saved resume not found.'); return; }
+  const ta = document.getElementById(textareaId);
+  if (ta) ta.value = buildResumePlainText(r.data);
+  showToast('Loaded: ' + r.name);
+}
+
 function loadSavedResumeIntoJobMatch() {
   const select = document.getElementById('jmLoadSelect');
   if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
@@ -6521,6 +6559,7 @@ function saveCurrentResume() {
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
   renderJobMatchLoadOptions();
+  renderInterviewLoadOptions();
   showToast('Resume saved: ' + name);
 }
 
@@ -6598,6 +6637,7 @@ function deleteSavedResume(id) {
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
   renderJobMatchLoadOptions();
+  renderInterviewLoadOptions();
   showToast('Deleted.');
 }
 
@@ -7530,6 +7570,7 @@ function switchInterviewTab(tab, btn) {
   if (btn) btn.classList.add('active');
   var pnl = document.getElementById('iv-' + tab);
   if (pnl) pnl.classList.add('active');
+  renderInterviewLoadOptions();
 }
 function setIvType(type, btn) {
   // Handle both calling conventions: setIvType('type', this) and setIvType(this)
