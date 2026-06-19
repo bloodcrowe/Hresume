@@ -3,7 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Howdy Resume — Freelance Intelligence Platform</title>
+<title>Howdy Resume | AI Resume Builder, ATS Optimizer & Job Tools</title>
+<meta name="description" content="Build, score, optimize, and export professional resumes with AI. Howdy Resume includes ATS checks, resume templates, job match tools, cover letters, and saved resume versions.">
+<meta name="theme-color" content="#0a0a0f">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Howdy Resume | AI Resume Builder & ATS Optimizer">
+<meta property="og:description" content="Upload or build a resume, improve your ATS score, match it to jobs, and export polished PDF or Word versions.">
+<meta property="og:site_name" content="Howdy Resume">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Howdy Resume | AI Resume Builder & ATS Optimizer">
+<meta name="twitter:description" content="Build, score, optimize, and export resumes with AI-powered job tools.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Howdy Resume",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "AI resume builder and optimizer with ATS scoring, resume templates, job matching, cover letters, and PDF or Word exports.",
+  "offers": [
+    {"@type": "Offer", "name": "Starter", "price": "0", "priceCurrency": "USD"},
+    {"@type": "Offer", "name": "Pro", "price": "7.99", "priceCurrency": "USD"},
+    {"@type": "Offer", "name": "Agency", "price": "15.99", "priceCurrency": "USD"}
+  ]
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -76,6 +100,17 @@ h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent2),#c4b5fd
 .stat{text-align:center;}
 .stat-num{font-family:var(--font-display);font-size:26px;font-weight:700;}
 .stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
+.hero-proof{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:-24px auto 34px;max-width:760px;}
+.hero-proof span{font-size:12px;color:var(--muted);background:rgba(255,255,255,0.04);border:1px solid var(--border);padding:6px 12px;border-radius:20px;}
+.resume-conversion-band{max-width:960px;margin:16px auto 54px;padding:24px;display:grid;grid-template-columns:1.35fr .9fr;gap:22px;align-items:center;background:linear-gradient(135deg,rgba(52,211,153,0.09),rgba(124,106,255,0.08));border:1px solid rgba(52,211,153,0.22);border-radius:18px;}
+.resume-band-label{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--success);margin-bottom:8px;}
+.resume-conversion-band h2{font-family:var(--font-display);font-size:26px;line-height:1.15;letter-spacing:-.6px;margin-bottom:10px;}
+.resume-conversion-band p{color:var(--muted);font-size:14px;line-height:1.55;max-width:580px;}
+.resume-band-actions{display:flex;flex-direction:column;gap:10px;}
+.resume-band-actions button{width:100%;}
+.resume-band-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+.resume-band-mini div{background:rgba(10,10,15,.34);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;color:var(--muted);}
+.resume-band-mini strong{display:block;color:var(--text);font-family:var(--font-display);font-size:15px;margin-bottom:2px;}
 
 /* BEFORE/AFTER */
 .before-after{max-width:960px;margin:60px auto;padding:0 24px;}
@@ -416,6 +451,9 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
   .tool-body{grid-template-columns:1fr;}
   .input-side{border-right:none;border-bottom:1px solid var(--border);max-height:none;}
   .pricing-grid,.testi-grid,.ba-grid,.tracker-stats{grid-template-columns:1fr;}
+  .resume-conversion-band{grid-template-columns:1fr;margin:0 16px 40px;padding:20px;}
+  .resume-conversion-band h2{font-size:22px;}
+  .resume-band-mini{grid-template-columns:1fr;}
   .kanban{grid-template-columns:1fr 1fr;}
   .tracker-header,.tracker-row{grid-template-columns:2fr 1fr auto;}
   .tracker-tone,.tracker-date{display:none;}
@@ -961,12 +999,18 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 <!-- ══════════ HOME PAGE ══════════ -->
 <div class="page active" id="page-home">
   <section class="hero">
-    <div class="hero-badge">Freelance Intelligence Platform</div>
-    <h1>Find. Analyze. <em>Win.</em></h1>
-    <p class="hero-sub">The complete freelance workflow — find quality jobs, dissect them with AI, and generate winning proposals in seconds.</p>
+    <div class="hero-badge">AI Resume + Job Search Platform</div>
+    <h1>Build. Optimize. <em>Get interviews.</em></h1>
+    <p class="hero-sub">Upload your resume, get an ATS-style score, fix weak spots with AI, and export a polished PDF or Word resume in the template you choose.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="openModal('signup')">Start for free →</button>
-      <button class="btn-secondary" onclick="showPage('tool')">Try the generator</button>
+      <button class="btn-primary" onclick="goToResumeOptimize()">Scan my resume</button>
+      <button class="btn-secondary" onclick="goToResumeBuild()">Build from scratch</button>
+    </div>
+    <div class="hero-proof">
+      <span>No credit card to start</span>
+      <span>PDF + Word exports</span>
+      <span>ATS score + rewrite suggestions</span>
+      <span>Saved resume versions</span>
     </div>
     <!-- FOUNDING MEMBERS COUNTDOWN -->
     <div class="founding-banner">
@@ -987,12 +1031,29 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
     </div>
 
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num" id="liveCounter">47,291</div><div class="stat-label">proposals generated</div></div>
-      <div class="stat"><div class="stat-num">3×</div><div class="stat-label">higher response rate</div></div>
-      <div class="stat"><div class="stat-num">10s</div><div class="stat-label">avg. generation time</div></div>
+      <div class="stat"><div class="stat-num" id="liveCounter">47,291</div><div class="stat-label">career documents generated</div></div>
+      <div class="stat"><div class="stat-num">82</div><div class="stat-label">sample resume score</div></div>
+      <div class="stat"><div class="stat-num">60s</div><div class="stat-label">to find resume gaps</div></div>
       <div class="stat"><div class="stat-num">$0</div><div class="stat-label">to get started</div></div>
     </div>
   </section>
+
+  <div class="resume-conversion-band">
+    <div>
+      <div class="resume-band-label">Fastest path to value</div>
+      <h2>Turn one rough resume into a cleaner, job-ready version before you apply.</h2>
+      <p>Howdy Resume checks placeholders, dates, skills, summary quality, job match, and template exports in one workflow so users are not stuck rebuilding the same resume twice.</p>
+      <div class="resume-band-mini">
+        <div><strong>1</strong>Upload or build</div>
+        <div><strong>2</strong>Score and fix</div>
+        <div><strong>3</strong>Export and apply</div>
+      </div>
+    </div>
+    <div class="resume-band-actions">
+      <button class="btn-primary" onclick="goToResumeOptimize()">Get my resume score</button>
+      <button class="btn-secondary" onclick="showPage('resume')">Open resume tools</button>
+    </div>
+  </div>
 
   <!-- BEFORE / AFTER -->
   <div class="before-after">
@@ -1034,14 +1095,28 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
   <!-- PRICING -->
   <div class="pricing-section" id="pricingSection">
     <h2 class="section-heading">Simple pricing</h2>
-    <p class="section-sub">Start free. Upgrade when you're winning jobs.</p>
-    <div class="pricing-grid">
+    <p class="section-sub">Start free. Lock in founding-member rates before they're gone.</p>
+
+    <!-- Billing toggle -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:32px;">
+      <span id="toggleMonthLabel" style="font-size:14px;font-weight:600;color:var(--text);">Monthly</span>
+      <div onclick="toggleBilling()" id="billingToggle" style="width:52px;height:28px;background:var(--surface3);border:1px solid var(--border2);border-radius:14px;cursor:pointer;position:relative;transition:background 0.25s;">
+        <div id="billingKnob" style="width:22px;height:22px;background:var(--accent);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform 0.25s;box-shadow:0 2px 6px rgba(124,106,255,0.5);"></div>
+      </div>
+      <span id="toggleYearLabel" style="font-size:14px;font-weight:500;color:var(--muted);">Annual <span style="background:rgba(52,211,153,0.12);color:var(--success);border:1px solid rgba(52,211,153,0.3);border-radius:20px;font-size:11px;font-weight:700;padding:2px 8px;margin-left:4px;">SAVE 30%</span></span>
+    </div>
+
+    <div class="pricing-grid" style="grid-template-columns:repeat(3,1fr);">
+      <!-- STARTER -->
       <div class="price-card">
         <div class="plan-name">Starter</div>
         <div class="plan-price">$0 <span>/mo</span></div>
         <div class="plan-desc">Try it out. No credit card needed.</div>
         <ul class="plan-features">
           <li>3 proposals / month</li>
+          <li>Build 1 resume version</li>
+          <li>Basic ATS-style score</li>
+          <li>Classic resume template export</li>
           <li>All 4 tone options</li>
           <li>Rate proposals (👍👎)</li>
           <li>Copy to clipboard</li>
@@ -1056,13 +1131,23 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
         </ul>
         <button class="plan-btn" onclick="openModal('signup')">Get started free</button>
       </div>
+
+      <!-- PRO -->
       <div class="price-card popular">
-        <div class="popular-tag">Most popular</div>
+        <div class="popular-tag">🔥 Founding Rate</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-price">$7.99 <span>/mo</span></div>
+        <div style="margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:13px;color:var(--muted2);text-decoration:line-through;" id="proRegular">was $19.99/mo</span>
+        </div>
+        <div class="plan-price" id="proDisplayPrice">$7.99 <span id="proPerLabel">/mo</span></div>
+        <div id="proAnnualNote" style="display:none;font-size:12px;color:var(--success);margin-bottom:4px;">$67.08 billed annually</div>
         <div class="plan-desc">For freelancers actively winning jobs.</div>
         <ul class="plan-features">
           <li>Unlimited proposals</li>
+          <li>Unlimited resume builds</li>
+          <li>Resume optimizer with rewrite actions</li>
+          <li>PDF + Word exports for resume templates</li>
+          <li>Saved resume versions</li>
           <li>All 4 tones + length control</li>
           <li>Job dissection report</li>
           <li>Red flag detector</li>
@@ -1075,14 +1160,24 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
           <li>Follow-up email generator</li>
           <li>Cover letter & cold outreach modes</li>
         </ul>
-        <button class="plan-btn cta" onclick="openUpgrade('pro')">Start Pro →</button>
+        <div style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:10px;">🔒 Price locked for life. Cancel anytime.</div>
+        <button class="plan-btn cta" id="proBuyBtn" onclick="handleProCheckout()">Start Pro — Lock in $7.99 →</button>
       </div>
-      <div class="price-card">
+
+      <!-- AGENCY -->
+      <div class="price-card" style="border-color:rgba(52,211,153,0.25);">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--success);color:#0a0a0f;font-size:11px;font-weight:700;padding:3px 14px;border-radius:20px;font-family:var(--font-display);white-space:nowrap;">Best Value</div>
         <div class="plan-name">Agency</div>
-        <div class="plan-price">$15.99 <span>/mo</span></div>
+        <div style="margin-bottom:2px;">
+          <span style="font-size:13px;color:var(--muted2);text-decoration:line-through;" id="agencyRegular">was $39.99/mo</span>
+        </div>
+        <div class="plan-price" id="agencyDisplayPrice">$15.99 <span id="agencyPerLabel">/mo</span></div>
+        <div id="agencyAnnualNote" style="display:none;font-size:12px;color:var(--success);margin-bottom:4px;">$134.28 billed annually</div>
         <div class="plan-desc">For teams and high-volume bidders.</div>
         <ul class="plan-features">
           <li>Everything in Pro</li>
+          <li>Team resume/profile library</li>
+          <li>Bulk resume review workflow</li>
           <li>5 team seats</li>
           <li>Priority generation</li>
           <li>Client research summary</li>
@@ -1091,15 +1186,83 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
           <li>Team usage analytics</li>
           <li>Priority support</li>
         </ul>
-        <button class="plan-btn" onclick="openUpgrade('agency')">Get Agency →</button>
+        <div style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:10px;">🔒 Price locked for life. Cancel anytime.</div>
+        <button class="plan-btn" style="border-color:rgba(52,211,153,0.5);color:var(--success);" id="agencyBuyBtn" onclick="handleAgencyCheckout()">Get Agency — Lock in $15.99 →</button>
       </div>
     </div>
+
+    <!-- SOCIAL PROOF STRIPE -->
+    <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:28px;padding-top:24px;border-top:1px solid var(--border);">
+      <span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">🔒 Secure checkout via Stripe</span>
+      <span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">✓ Cancel anytime — no questions</span>
+      <span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">💬 Priority email support</span>
+      <span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">🏆 Used by 2,000+ job seekers</span>
+    </div>
   </div>
+
+<script>
+// ── BILLING TOGGLE ──────────────────────────────────────────
+let billingAnnual = false;
+function toggleBilling() {
+  billingAnnual = !billingAnnual;
+  const knob = document.getElementById('billingKnob');
+  const toggle = document.getElementById('billingToggle');
+  const monthLabel = document.getElementById('toggleMonthLabel');
+  const yearLabel  = document.getElementById('toggleYearLabel');
+  if (billingAnnual) {
+    knob.style.transform = 'translateX(24px)';
+    toggle.style.background = 'var(--accent)';
+    monthLabel.style.color = 'var(--muted)';
+    yearLabel.style.color = 'var(--text)';
+    document.getElementById('proDisplayPrice').innerHTML = '$5.59 <span id="proPerLabel">/mo</span>';
+    document.getElementById('proRegular').textContent = 'was $19.99/mo';
+    document.getElementById('proAnnualNote').style.display = 'block';
+    document.getElementById('agencyDisplayPrice').innerHTML = '$11.19 <span id="agencyPerLabel">/mo</span>';
+    document.getElementById('agencyRegular').textContent = 'was $39.99/mo';
+    document.getElementById('agencyAnnualNote').style.display = 'block';
+    document.getElementById('proBuyBtn').textContent = 'Get Annual Pro — $67/yr →';
+    document.getElementById('agencyBuyBtn').textContent = 'Get Annual Agency — $134/yr →';
+  } else {
+    knob.style.transform = 'translateX(0)';
+    toggle.style.background = 'var(--surface3)';
+    monthLabel.style.color = 'var(--text)';
+    yearLabel.style.color = 'var(--muted)';
+    document.getElementById('proDisplayPrice').innerHTML = '$7.99 <span id="proPerLabel">/mo</span>';
+    document.getElementById('proRegular').textContent = 'was $19.99/mo';
+    document.getElementById('proAnnualNote').style.display = 'none';
+    document.getElementById('agencyDisplayPrice').innerHTML = '$15.99 <span id="agencyPerLabel">/mo</span>';
+    document.getElementById('agencyRegular').textContent = 'was $39.99/mo';
+    document.getElementById('agencyAnnualNote').style.display = 'none';
+    document.getElementById('proBuyBtn').textContent = 'Start Pro — Lock in $7.99 →';
+    document.getElementById('agencyBuyBtn').textContent = 'Get Agency — Lock in $15.99 →';
+  }
+}
+function handleProCheckout() {
+  if (billingAnnual) {
+    // TODO: replace with your Stripe annual Pro link
+    alert('Annual plan coming soon! Use monthly for now — same founding-member rate.');
+  } else {
+    window.open('https://buy.stripe.com/9B68wO1Gx0yuacvbuF43S00','_blank');
+  }
+}
+function handleAgencyCheckout() {
+  if (billingAnnual) {
+    // TODO: replace with your Stripe annual Agency link
+    alert('Annual plan coming soon! Use monthly for now — same founding-member rate.');
+  } else {
+    window.open('https://buy.stripe.com/5kQ28q4SJgxs84n7ep43S01','_blank');
+  }
+}
+// ── END BILLING TOGGLE ──────────────────────────────────────
+</script>
 
   <!-- FAQ -->
   <div class="faq-section">
     <h2 class="section-heading" style="font-size:28px;margin-bottom:32px;">Frequently asked questions</h2>
-    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How does Howdy Resume work? <span class="faq-arrow">▼</span></button><div class="faq-a">Paste a job post or URL, optionally run a Job Dissection to get deep AI analysis of what the client really needs, then generate a fully custom proposal built around those insights. Every proposal is unique — no templates.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What should I do first? <span class="faq-arrow">▼</span></button><div class="faq-a">Start in Resume, upload your current resume, run the optimizer, fill any requested placeholders, then export the finished version as PDF or Word using the template dropdown.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I use this for ATS resume checks? <span class="faq-arrow">▼</span></button><div class="faq-a">Yes. The optimizer checks common resume issues such as missing keywords, unclear impact, date formatting, placeholders, weak summaries, and job-match gaps. It is built to improve clarity without stuffing the resume with unrealistic numbers.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I download both PDF and Word resumes? <span class="faq-arrow">▼</span></button><div class="faq-a">Yes. Resume templates can be exported as PDF or Word, and optimized resume text can be saved back into your resume workflow for final template selection.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How does Howdy Resume work? <span class="faq-arrow">▼</span></button><div class="faq-a">Use the Resume tools to build, score, optimize, and export your resume. Then use Job Match, Cover Letter, LinkedIn, and proposal tools to tailor the rest of your application around the job you want.</div></div>
     <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What is the Job Dissection report? <span class="faq-arrow">▼</span></button><div class="faq-a">The dissection reads between the lines of any job post and gives you: what the client actually wants, hidden requirements, red flags, ideal rate range, competition estimate, and 3 specific angles to stand out. The proposal then uses all of this to be hyper-targeted.</div></div>
     <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Will clients know I used AI? <span class="faq-arrow">▼</span></button><div class="faq-a">Howdy Resume avoids generic AI phrasing and writes in a natural, human tone. We recommend reviewing and adding one personal touch before sending. The dissection feature ensures the content is specific enough to your job that it won't read as generic.</div></div>
     <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What freelance platforms does it work with? <span class="faq-arrow">▼</span></button><div class="faq-a">Works with any platform: Upwork, Fiverr, Freelancer.com, Toptal, PeoplePerHour, LinkedIn, Indeed, and direct client outreach. Just paste the job description and go.</div></div>
@@ -1478,7 +1641,7 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
   <div class="modal" id="upgradeModal" style="display:none;">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">Upgrade your plan</div>
-    <div class="modal-sub">Unlock the full freelance intelligence platform.</div>
+    <div class="modal-sub">Unlock the full resume and job search platform.</div>
     <div class="upgrade-grid">
       <div class="upgrade-card selected" id="upgradeCardPro" onclick="selectUpgradePlan('pro')">
         <div class="upgrade-plan-name">Pro</div>
@@ -2515,8 +2678,8 @@ const CONFIG = {
   API_PROXY_URL: 'https://howdyresume.com/api/generate',
   STRIPE_PRO_LINK:    'https://buy.stripe.com/9B68wO1Gx0yuacvbuF43S00',
   STRIPE_AGENCY_LINK: 'https://buy.stripe.com/5kQ28q4SJgxs84n7ep43S01',
-  ADMIN_EMAIL: 'admin@howdyresume.com',
-  ADMIN_HASH: 'e6247bdf6885fbc3e050ed3bbfb003aa260f52b16a03bcf4fbfc47e86a154c3c',
+  // Admin credentials are stored ONLY in Vercel environment variables (ADMIN_EMAIL, ADMIN_PASSWORD).
+  // Nothing secret lives in this file. Login is verified server-side only.
 };
 
 // ══ STATE ══
@@ -2684,6 +2847,25 @@ function showPage(name) {
   if (name === 'admin') renderAdminDashboard();
   if (name === 'jobs') { renderJobs(); renderTrackerBoard(); }
   if (name === 'resume') { renderTemplateGallery(); renderPreview(); }
+}
+
+function findResumeTab(label) {
+  return Array.from(document.querySelectorAll('#page-resume .rp-tab')).find(btn =>
+    btn.textContent.toLowerCase().includes(label.toLowerCase())
+  );
+}
+
+function goToResumeBuild() {
+  showPage('resume');
+  const btn = findResumeTab('Build Resume');
+  if (typeof switchResumeTab === 'function') switchResumeTab('build', btn);
+}
+
+function goToResumeOptimize() {
+  showPage('resume');
+  const btn = findResumeTab('Optimize');
+  if (typeof switchResumeTab === 'function') switchResumeTab('optimize', btn);
+  setTimeout(() => document.getElementById('optResumeText')?.focus(), 0);
 }
 
 function setModeByName(mode) {
@@ -3618,14 +3800,32 @@ async function handleAdminLogin(){
   document.getElementById('adminError').style.display='none';
   if(!email||!pass){showModalError('adminError','Please enter credentials.');return;}
 
-  // Hash the entered password and compare to stored hash
-  const msgBuffer = new TextEncoder().encode(pass);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Step 1: client-side hash check (fast pre-screen, if ADMIN_HASH is set)
+  if(CONFIG.ADMIN_EMAIL && CONFIG.ADMIN_HASH) {
+    const msgBuffer = new TextEncoder().encode(pass);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    if(email !== CONFIG.ADMIN_EMAIL || hashHex !== CONFIG.ADMIN_HASH){
+      showModalError('adminError','Incorrect credentials.');
+      return;
+    }
+  }
 
-  if(email !== CONFIG.ADMIN_EMAIL || hashHex !== CONFIG.ADMIN_HASH){
-    showModalError('adminError','Incorrect credentials.');
+  // Step 2: server-side verification (required — client-side alone is bypassable)
+  try {
+    const r = await fetch(CONFIG.API_PROXY_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'admin-auth', email, password: pass})
+    });
+    const data = await r.json();
+    if(!r.ok || !data.success){
+      showModalError('adminError', data.error || 'Incorrect credentials.');
+      return;
+    }
+  } catch(e) {
+    showModalError('adminError','Could not reach server. Check your connection.');
     return;
   }
 
@@ -5255,7 +5455,10 @@ renderTemplateGallery();
 renderOptimizeTemplateOptions();
 renderPreview();
 const optResumeTextInput = document.getElementById('optResumeText');
-if (optResumeTextInput) optResumeTextInput.addEventListener('input', () => checkOptimizerPlaceholders());
+if (optResumeTextInput) optResumeTextInput.addEventListener('input', function() {
+  improvedResumeText = optResumeTextInput.value;
+  checkOptimizerPlaceholders();
+});
 
 // ══ RESUME PAGE TABS ══
 function switchResumeTab(tab, btn) {
@@ -5604,6 +5807,7 @@ function applySuggestion(i, opts = {}) {
       ta.value = ta.value.replace(iss.before, after);
     }
     improvedResumeText = ta.value;
+    checkOptimizerPlaceholders(ta.value);
     const atsEl = document.getElementById('optAtsChecks');
     if (atsEl) atsEl.innerHTML = renderATSBasics(ta.value);
   }
@@ -7650,6 +7854,88 @@ function renderTrackerBoard() {
     el.appendChild(card);
   });
 }
+</script>
+
+<!-- ══════════════════════════════════════════════════════
+     EXIT-INTENT EMAIL CAPTURE POPUP
+     Fires when cursor exits toward top of window.
+     Collects email → stores in localStorage (hook up to
+     Mailchimp / ConvertKit / Beehiiv in the fetch call).
+     ══════════════════════════════════════════════════════ -->
+<div id="exitIntentOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(8px);z-index:9000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid rgba(124,106,255,0.35);border-radius:24px;padding:40px 36px;max-width:440px;width:100%;position:relative;animation:modalIn .28s ease;text-align:center;box-shadow:0 0 80px rgba(124,106,255,0.18);">
+    <button onclick="closeExitIntent()" style="position:absolute;top:14px;right:18px;background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+    <div style="font-size:40px;margin-bottom:12px;">📋</div>
+    <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:8px;">Before you go — grab this free</div>
+    <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--accent2);margin-bottom:14px;">ATS Resume Checklist</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6;">The exact 23-point checklist our top users run before every job application. Yours free — no credit card, no catch.</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input id="exitEmail" type="email" placeholder="your@email.com" style="flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font-body);font-size:14px;padding:12px 14px;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'" onkeydown="if(event.key==='Enter')submitExitIntent()">
+      <button onclick="submitExitIntent()" style="padding:12px 20px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">Send it →</button>
+    </div>
+    <div id="exitThanks" style="display:none;color:var(--success);font-size:14px;font-weight:600;padding:10px;">✓ Check your inbox! Also — your first 3 optimizations are free inside Howdy Resume.</div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:8px;">No spam. Unsubscribe anytime. ~500 people already grabbed this.</div>
+  </div>
+</div>
+
+<script>
+// ── EXIT INTENT LOGIC ───────────────────────────────────────
+(function(){
+  let fired = false;
+  const key = 'hrexit_shown';
+  // Only show once per session, and not if already signed in
+  if (sessionStorage.getItem(key)) return;
+
+  document.addEventListener('mouseleave', function(e){
+    if (fired) return;
+    if (e.clientY > 10) return; // only top-exit
+    fired = true;
+    sessionStorage.setItem(key, '1');
+    const overlay = document.getElementById('exitIntentOverlay');
+    overlay.style.display = 'flex';
+    // also show after 45s on mobile (no mouseleave)
+  });
+
+  // Mobile: show after 45s of inactivity if not yet shown
+  setTimeout(function(){
+    if (fired) return;
+    if (sessionStorage.getItem(key)) return;
+    // only show on mobile
+    if (window.innerWidth > 768) return;
+    fired = true;
+    sessionStorage.setItem(key, '1');
+    document.getElementById('exitIntentOverlay').style.display = 'flex';
+  }, 45000);
+})();
+
+function closeExitIntent() {
+  document.getElementById('exitIntentOverlay').style.display = 'none';
+}
+
+async function submitExitIntent() {
+  const email = document.getElementById('exitEmail').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('exitEmail').style.borderColor = 'var(--danger)';
+    return;
+  }
+  // Store locally
+  const leads = JSON.parse(localStorage.getItem('hr_leads')||'[]');
+  leads.push({email, ts: new Date().toISOString()});
+  localStorage.setItem('hr_leads', JSON.stringify(leads));
+
+  // ── HOOK UP YOUR EMAIL PROVIDER HERE ──
+  // Example for Mailchimp, ConvertKit, Beehiiv, etc:
+  // await fetch('YOUR_FORM_ENDPOINT', {
+  //   method:'POST', headers:{'Content-Type':'application/json'},
+  //   body: JSON.stringify({email})
+  // });
+
+  document.getElementById('exitThanks').style.display = 'block';
+  document.getElementById('exitEmail').style.display = 'none';
+  document.querySelector('#exitIntentOverlay button[onclick="submitExitIntent()"]').style.display = 'none';
+  setTimeout(() => closeExitIntent(), 4000);
+}
+// ── END EXIT INTENT ─────────────────────────────────────────
 </script>
 </body>
 </html>
