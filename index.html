@@ -5643,7 +5643,33 @@ function downloadResumePDF() {
   if (!data.name) { showToast('Add your name first.'); return; }
   if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
   if (rbStyle === 'classic' || rbStyle === 'classic2') { exportClassicResumePDF(data); return; }
-  exportTemplateResumePDF(data);
+  // For all styled templates, print the actual rendered HTML so the PDF matches the preview exactly
+  printStyledResumePDF(data);
+}
+
+function printStyledResumePDF(data) {
+  const resumeHTML = buildResumeHTML(data, rbStyle);
+  const css = getResumePageCSS();
+  const printContent = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+${css}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
+@page{margin:0;size:letter;}
+body{margin:0;padding:0;background:#fff;}
+@media print{
+  body{margin:0;}
+  .resume-builder-preview,.rb-preview-container,.page-resume-wrap{display:block!important;}
+}
+</style>
+</head><body>${resumeHTML}</body></html>`;
+  const win = window.open('', '_blank', 'width=900,height=1100');
+  if (!win) { showToast('Pop-up blocked — allow pop-ups for this site to download PDF.'); return; }
+  win.document.open();
+  win.document.write(printContent);
+  win.document.close();
+  win.onload = function() {
+    setTimeout(function() { win.focus(); win.print(); }, 300);
+  };
 }
 
 // init resume builder lists
@@ -7070,7 +7096,7 @@ async function exportImprovedResume() {
   const data = await parseOptimizedResumeText(text);
   if (!data) return;
   if (rbStyle === 'classic' || rbStyle === 'classic2') exportClassicResumePDF(data);
-  else exportTemplateResumePDF(data);
+  else printStyledResumePDF(data);
 }
 
 // ══ JOB MATCH ══
