@@ -2297,14 +2297,14 @@ function handleAgencyCheckout() {
         <div style="display:flex;flex-direction:column;gap:10px;">
           <!-- LinkedIn Profile Import -->
           <div class="rb-field">
-            <label class="rb-label">Import LinkedIn Profile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-            <div class="url-row" style="margin-top:4px;">
-              <input type="text" class="rb-input" id="li-profile-url" placeholder="Paste your LinkedIn profile URL..." style="font-size:13px;">
-              <button class="import-btn" onclick="importLinkedInProfile('optimizer')">Import →</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <label class="rb-label">Import from LinkedIn Profile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+              <button onclick="importLinkedInProfile('optimizer')" id="li-import-btn" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.1);color:#60a5fa;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">⚡ Parse Profile</button>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;">Tip: Go to your LinkedIn profile → right-click the page → Copy page address, then paste it here.</div>
+            <textarea class="rb-textarea" id="li-profile-paste" placeholder="Go to your LinkedIn profile → press Ctrl+A (select all) → Ctrl+C (copy) → paste here. We'll auto-extract your headline, About, and experience." style="min-height:80px;font-size:12px;"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;">💡 On your LinkedIn profile page: <strong style="color:var(--text);">Ctrl+A</strong> → <strong style="color:var(--text);">Ctrl+C</strong> → paste above, then click Parse.</div>
           </div>
-          <div style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:.03em;">— or fill in manually —</div>
+          <div style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:.03em;">— or fill in manually below —</div>
           <div class="rb-field"><label class="rb-label">Target Role / Job Title</label><input class="rb-input" id="li-role" placeholder="e.g. Senior Product Manager, Freelance Designer..."></div>
           <div class="rb-field">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -2351,12 +2351,12 @@ function handleAgencyCheckout() {
           <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.55;">Paste your current LinkedIn profile text (headline, about, experience bullets). Get a score with actionable improvements.</div>
           <!-- LinkedIn Profile Import -->
           <div class="rb-field" style="margin-bottom:10px;">
-            <label class="rb-label">Import LinkedIn Profile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-            <div class="url-row" style="margin-top:4px;">
-              <input type="text" class="rb-input" id="lis-profile-url" placeholder="Paste your LinkedIn profile URL..." style="font-size:13px;">
-              <button class="import-btn" onclick="importLinkedInProfile('scorer')">Import →</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <label class="rb-label">Import from LinkedIn Profile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+              <button onclick="importLinkedInProfile('scorer')" id="lis-import-btn" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.1);color:#60a5fa;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">⚡ Parse Profile</button>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;">Tip: Go to your LinkedIn profile → right-click the page → Copy page address, then paste it here.</div>
+            <textarea class="rb-textarea" id="lis-profile-paste" placeholder="Go to your LinkedIn profile → press Ctrl+A (select all) → Ctrl+C (copy) → paste here. We'll auto-extract your headline, About, and current role." style="min-height:80px;font-size:12px;"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;">💡 On your LinkedIn profile page: <strong style="color:var(--text);">Ctrl+A</strong> → <strong style="color:var(--text);">Ctrl+C</strong> → paste above, then click Parse.</div>
           </div>
           <div style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:.03em;margin-bottom:4px;">— or fill in manually —</div>
           <div class="rb-field" style="margin-bottom:10px;">
@@ -6171,61 +6171,51 @@ async function runLinkedInScore() {
 }
 
 async function importLinkedInProfile(mode) {
-  const urlInputId = mode === 'scorer' ? 'lis-profile-url' : 'li-profile-url';
-  const url = document.getElementById(urlInputId).value.trim();
-  if (!url) { showToast('Paste a LinkedIn profile URL first.'); return; }
-  if (!url.includes('linkedin.com')) { showToast('That doesn\'t look like a LinkedIn URL.'); return; }
+  const pasteId = mode === 'scorer' ? 'lis-profile-paste' : 'li-profile-paste';
+  const btnId   = mode === 'scorer' ? 'lis-import-btn'   : 'li-import-btn';
+  const text = document.getElementById(pasteId).value.trim();
+  if (!text || text.length < 50) { showToast('Paste your LinkedIn profile text first (Ctrl+A → Ctrl+C on your profile page).'); return; }
 
-  const btn = event.target;
+  const btn = document.getElementById(btnId);
   const origText = btn.textContent;
-  btn.textContent = 'Importing...';
+  btn.textContent = 'Parsing...';
   btn.disabled = true;
 
   try {
-    // Fetch the page server-side
-    const res = await fetch(CONFIG.API_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'fetch-url', url })
-    });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Could not fetch profile.');
-
-    // Ask AI to extract the relevant sections
     const extracted = await callAI(
-      `From this LinkedIn profile page text, extract:\n1. The person's current headline\n2. Their About section (verbatim if present)\n3. Their name\n4. Their current job title and company\n\nReturn as JSON: {"name":"","headline":"","about":"","currentRole":""}\n\nProfile text:\n${data.text}`,
-      'You extract structured data from LinkedIn profile page text. Return only valid JSON, no markdown.'
+      `From this LinkedIn profile page text, extract:\n1. The person's current headline\n2. Their About section (full text, verbatim if present)\n3. Their name\n4. Their current job title and company (combined as one string)\n\nReturn as JSON only: {"name":"","headline":"","about":"","currentRole":""}\n\nProfile text:\n${text.substring(0, 6000)}`,
+      'You extract structured data from pasted LinkedIn profile text. Return only valid JSON, no markdown, no extra text.'
     );
 
     let profile;
     try { profile = JSON.parse(extracted.replace(/```json?|```/g, '').trim()); }
-    catch(e) { throw new Error('Could not parse profile data.'); }
+    catch(e) { throw new Error('Could not parse — try selecting more of the page.'); }
 
     if (mode === 'optimizer') {
-      if (profile.headline || profile.currentRole) {
+      if (profile.currentRole || profile.headline) {
         document.getElementById('li-role').value = profile.currentRole || profile.headline || '';
       }
       if (profile.about) {
         document.getElementById('li-about-current').value = profile.about;
       }
-      if (profile.name || profile.headline || profile.about) {
-        const summary = [
-          profile.name ? `Name: ${profile.name}` : '',
-          profile.headline ? `Headline: ${profile.headline}` : '',
-          profile.currentRole ? `Current Role: ${profile.currentRole}` : '',
-          profile.about ? `\nAbout:\n${profile.about}` : ''
-        ].filter(Boolean).join('\n');
-        document.getElementById('li-resume').value = summary;
-      }
-      showToast('LinkedIn profile imported!');
+      const summary = [
+        profile.name        ? `Name: ${profile.name}`               : '',
+        profile.headline    ? `Headline: ${profile.headline}`        : '',
+        profile.currentRole ? `Current Role: ${profile.currentRole}` : '',
+        profile.about       ? `\nAbout:\n${profile.about}`           : ''
+      ].filter(Boolean).join('\n');
+      if (summary) document.getElementById('li-resume').value = summary;
+      document.getElementById(pasteId).value = '';
+      showToast('Profile parsed — fields auto-filled!');
     } else {
-      if (profile.headline) document.getElementById('lis-headline').value = profile.headline;
-      if (profile.about) document.getElementById('lis-about').value = profile.about;
-      if (profile.currentRole) document.getElementById('lis-target').value = profile.currentRole;
-      showToast('LinkedIn profile imported!');
+      if (profile.headline)    document.getElementById('lis-headline').value = profile.headline;
+      if (profile.about)       document.getElementById('lis-about').value    = profile.about;
+      if (profile.currentRole) document.getElementById('lis-target').value   = profile.currentRole;
+      document.getElementById(pasteId).value = '';
+      showToast('Profile parsed — fields auto-filled!');
     }
   } catch(e) {
-    showToast('Import failed: ' + e.message + ' — try pasting your profile text manually.');
+    showToast('Parse failed: ' + e.message);
   } finally {
     btn.textContent = origText;
     btn.disabled = false;
