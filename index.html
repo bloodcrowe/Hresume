@@ -2311,6 +2311,10 @@ function handleAgencyCheckout() {
               <label class="rb-label">Your Resume / Background</label>
               <button onclick="liPullFromBuilder()" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(124,106,255,.4);background:rgba(124,106,255,.08);color:var(--accent2);cursor:pointer;font-family:var(--font-body);">↑ Pull from Builder</button>
             </div>
+            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+              <select class="rb-input" id="liLoadSelect" style="flex:1;"><option value="">Load from My Resumes...</option></select>
+              <button class="rb-download-btn" onclick="loadSavedResumeIntoLinkedIn()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+            </div>
             <textarea class="rb-textarea" id="li-resume" placeholder="Paste your resume or experience, or click 'Pull from Builder'..." style="min-height:120px;"></textarea>
           </div>
           <div class="rb-field">
@@ -5578,6 +5582,7 @@ function switchResumeTab(tab, btn) {
   if (tab === 'build') { renderPreview(); renderBuildLoadOptions(); }
   if (tab === 'optimize') { renderOptimizerSavedResumeOptions(); checkOptimizerPlaceholders(); }
   if (tab === 'jobmatch') { renderJobMatchLoadOptions(); }
+  if (tab === 'linkedin') { renderLinkedInLoadOptions(); }
   if (tab === 'myresumes') renderSavedResumes();
   if (tab === 'references') renderRefList();
 }
@@ -6011,6 +6016,7 @@ function confirmSaveOptimizedResume() {
   renderJobMatchLoadOptions();
   renderInterviewLoadOptions();
   renderAppPackLoadOptions();
+  renderLinkedInLoadOptions();
   closeModal();
   _saveOptData = null;
   showToast('Saved: ' + name);
@@ -6490,6 +6496,26 @@ function apPullFromBuilder() {
   showToast('Pulled from Builder!');
 }
 
+function renderLinkedInLoadOptions() {
+  const select = document.getElementById('liLoadSelect');
+  if (!select) return;
+  const saved = getSavedResumes();
+  select.innerHTML = '<option value="">Load from My Resumes...</option>' + saved.map(r => {
+    const score = r.score ? ' — Score ' + r.score.score + '/100' : '';
+    return '<option value="' + r.id + '">' + escapeResumeHTML(r.name || 'Saved Resume') + score + '</option>';
+  }).join('');
+}
+
+function loadSavedResumeIntoLinkedIn() {
+  const select = document.getElementById('liLoadSelect');
+  if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
+  const saved = getSavedResumes();
+  const r = saved.find(s => Number(s.id) === Number(select.value));
+  if (!r || !r.data) { showToast('Saved resume not found.'); return; }
+  document.getElementById('li-resume').value = buildResumePlainText(r.data);
+  showToast('Loaded: ' + r.name);
+}
+
 function renderAppPackLoadOptions() {
   const select = document.getElementById('apLoadSelect');
   if (!select) return;
@@ -6757,6 +6783,7 @@ function saveCurrentResume() {
   renderJobMatchLoadOptions();
   renderInterviewLoadOptions();
   renderAppPackLoadOptions();
+  renderLinkedInLoadOptions();
   showToast('Resume saved: ' + name);
 }
 
@@ -6836,6 +6863,7 @@ function deleteSavedResume(id) {
   renderJobMatchLoadOptions();
   renderInterviewLoadOptions();
   renderAppPackLoadOptions();
+  renderLinkedInLoadOptions();
   showToast('Deleted.');
 }
 
