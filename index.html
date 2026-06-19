@@ -6353,12 +6353,15 @@ async function runAppPack() {
     // Run all 3 in parallel
     const [resumeText, coverText, interviewText] = await Promise.all([
       callAI('RESUME:\n'+resume+'\n\nJOB:\n'+job,
-        `Rewrite this resume to maximize ATS match for the job. Only use existing experience, reframe using job language. Return the full resume text only.`),
+        `Rewrite this resume to maximize ATS match for the job. Only use existing experience, reframe using job language. Return the full resume text only. No markdown, no hashtags, no # headers, no asterisks. Plain text only.`),
       callAI('Write a cover letter for '+role+' at '+company+'.\n\nRESUME:\n'+resume+'\n\nJOB:\n'+job,
         `Expert cover letter writer. Professional tone, 3 paragraphs, specific to this person's actual background. Include subject line. No brackets.`),
       callAI('What are the 8 most likely interview questions for '+role+' at '+company+'?\n\nJOB:\n'+job+'\n\nCANDIDATE:\n'+resume,
         `Return JSON ONLY: {"questions":[{"q":"question","tip":"one-sentence answering tip"}]}`)
     ]);
+
+    // Strip markdown artifacts from resume text
+    const cleanResume = resumeText.replace(/^#+\s*(RESUME:?|TAILORED RESUME:?)\s*/im, '').replace(/\*\*/g, '').replace(/^#+\s+/gm, '').trim();
 
     // Tailored Resume
     const resumeCard = document.getElementById('ap-step-resume');
@@ -6371,7 +6374,7 @@ async function runAppPack() {
         <button class="cl-copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('ap-resume-text').textContent).then(()=>showToast('Copied!'))">Copy</button>
         <button class="rb-download-btn" onclick="exportStyledResumePDF(document.getElementById('ap-resume-text').textContent,'Tailored-Resume.pdf')" style="font-size:11px;padding:4px 10px;">⬇ PDF</button>
       </div>`;
-    out.innerHTML += `<div class="ct-output-card" style="margin-top:4px;"><div class="ct-card-label">📄 Tailored Resume</div><div class="ct-card-body" id="ap-resume-text">${resumeText}</div></div>`;
+    out.innerHTML += `<div class="ct-output-card" style="margin-top:4px;"><div class="ct-card-label">📄 Tailored Resume</div><div class="ct-card-body" id="ap-resume-text">${cleanResume}</div></div>`;
 
     // Cover Letter
     const coverCard = document.getElementById('ap-step-cover');
