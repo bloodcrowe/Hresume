@@ -1742,6 +1742,27 @@ function handleAgencyCheckout() {
     <button class="modal-btn" onclick="confirmSaveOptimizedResume()">Save Resume →</button>
   </div>
 
+  <!-- SAVE CURRENT RESUME MODAL -->
+  <div class="modal" id="saveBuildModal" style="display:none;max-width:420px;">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">💾 Save to My Resumes</div>
+    <div class="modal-field">
+      <label class="modal-label">Resume Name</label>
+      <input type="text" class="rb-input" id="saveBuildName" placeholder="e.g. Brian Vann - QA Resume" style="width:100%;box-sizing:border-box;">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="modal-field">
+      <div>
+        <label class="modal-label">Applied to Company <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input type="text" class="rb-input" id="saveBuildCompany" placeholder="e.g. Acme Corp" style="width:100%;box-sizing:border-box;margin-top:4px;">
+      </div>
+      <div>
+        <label class="modal-label">Role Applied For <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input type="text" class="rb-input" id="saveBuildRole" placeholder="e.g. Senior Designer" style="width:100%;box-sizing:border-box;margin-top:4px;">
+      </div>
+    </div>
+    <button class="modal-btn" onclick="confirmSaveCurrentResume()">Save Resume →</button>
+  </div>
+
   <!-- FORGOT PASSWORD -->
   <div class="modal" id="forgotModal" style="display:none;">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -3838,7 +3859,7 @@ function handleUpgrade(){
 // ══ MODALS ══
 function openModal(type){
   document.getElementById('modalOverlay').classList.add('open');
-  ['signupModal','loginModal','upgradeModal','addJobModal','jobDetailModal','adminModal','privacyModal','termsModal','forgotModal','saveOptModal'].forEach(id=>{
+  ['signupModal','loginModal','upgradeModal','addJobModal','jobDetailModal','adminModal','privacyModal','termsModal','forgotModal','saveOptModal','saveBuildModal'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display='none';
   });
   const target=document.getElementById(type+'Modal');
@@ -5920,10 +5941,23 @@ function checkOptimizerPlaceholders(textOverride) {
     return [];
   }
   alert.style.display = 'block';
-  alert.innerHTML = '<div class="opt-placeholder-alert-title">Missing details found</div>'
-    + '<div class="opt-placeholder-alert-body">This resume still has placeholder text. Fill these in before scoring, exporting, or sending it back to the Builder.</div>'
-    + '<div class="opt-placeholder-list">' + found.map(ph => '<span class="opt-placeholder-chip">' + escapeResumeHTML(ph) + '</span>').join('') + '</div>';
+  alert.innerHTML = '<div class="opt-placeholder-alert-title">⚠ Missing details found</div>'
+    + '<div class="opt-placeholder-alert-body">Click a tag below to jump to it in the text, then type the real value.</div>'
+    + '<div class="opt-placeholder-list">' + found.map(ph => '<span class="opt-placeholder-chip" style="cursor:pointer;" onclick="jumpToPlaceholder(' + JSON.stringify(ph) + ')" title="Click to jump to this placeholder">' + escapeResumeHTML(ph) + ' ✎</span>').join('') + '</div>';
   return found;
+}
+
+function jumpToPlaceholder(ph) {
+  const ta = document.getElementById('optResumeText');
+  if (!ta) return;
+  const idx = ta.value.indexOf(ph);
+  if (idx === -1) return;
+  ta.focus();
+  ta.setSelectionRange(idx, idx + ph.length);
+  // Scroll the textarea so the selection is visible
+  const lineHeight = parseInt(getComputedStyle(ta).lineHeight) || 18;
+  const lines = ta.value.substring(0, idx).split('\n').length;
+  ta.scrollTop = Math.max(0, (lines - 3) * lineHeight);
 }
 
 function renderMetricInputs(iss, i) {
@@ -6902,10 +6936,24 @@ function loadSavedResumeIntoJobMatch() {
 function saveCurrentResume() {
   const data = getResumeData();
   if (!data.name) { showToast('Add your name before saving.'); return; }
-  const name = prompt('Name this resume version:', data.name + ' Resume') || (data.name + ' Resume');
+  const nameEl = document.getElementById('saveBuildName');
+  const compEl = document.getElementById('saveBuildCompany');
+  const roleEl = document.getElementById('saveBuildRole');
+  if (nameEl) nameEl.value = data.name + ' Resume';
+  if (compEl) compEl.value = '';
+  if (roleEl) roleEl.value = '';
+  openModal('saveBuild');
+}
+
+function confirmSaveCurrentResume() {
+  const data = getResumeData();
+  if (!data.name) { showToast('Add your name before saving.'); return; }
+  const name = (document.getElementById('saveBuildName')?.value || '').trim() || (data.name + ' Resume');
+  const appliedCompany = document.getElementById('saveBuildCompany')?.value.trim() || '';
+  const appliedRole = document.getElementById('saveBuildRole')?.value.trim() || '';
   const saved = getSavedResumes();
-  saved.unshift({ id: Date.now(), name, style: rbStyle, color: rbAccentColor, data, score: lastResumeScore, savedAt: new Date().toLocaleDateString() });
-  setSavedResumes(saved.slice(0, 20)); // cap at 20
+  saved.unshift({ id: Date.now(), name, style: rbStyle, color: rbAccentColor, data, score: lastResumeScore, savedAt: new Date().toLocaleDateString(), appliedCompany, appliedRole });
+  setSavedResumes(saved.slice(0, 20));
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
@@ -6913,7 +6961,8 @@ function saveCurrentResume() {
   renderInterviewLoadOptions();
   renderAppPackLoadOptions();
   renderLinkedInLoadOptions();
-  showToast('Resume saved: ' + name);
+  closeModal();
+  showToast('Saved: ' + name);
 }
 
 function loadSavedResume(id) {
