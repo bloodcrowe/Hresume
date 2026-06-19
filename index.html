@@ -1180,14 +1180,14 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
         <ul class="plan-features">
           <li>Everything in Pro</li>
           <li>Unlimited proposal history (all time)</li>
-          <li>Priority AI generation (faster responses)</li>
-          <li>Client research summary per job post</li>
-          <li>Weekly job alert digest (email)</li>
-          <li>Proposal templates library</li>
-          <li>Advanced usage analytics dashboard</li>
+          <li>Priority AI generation (faster responses) <span style="font-size:10px;color:var(--warn);font-weight:700;">Soon</span></li>
+          <li>Client research summary per job post <span style="font-size:10px;color:var(--warn);font-weight:700;">Soon</span></li>
+          <li>Weekly job alert digest (email) <span style="font-size:10px;color:var(--warn);font-weight:700;">Soon</span></li>
+          <li>Proposal templates library <span style="font-size:10px;color:var(--warn);font-weight:700;">Soon</span></li>
+          <li>Advanced usage analytics dashboard <span style="font-size:10px;color:var(--warn);font-weight:700;">Soon</span></li>
           <li>Early access to new features</li>
           <li>Priority email support (reply within 24hrs)</li>
-          <li>Monthly resume review by our team</li>
+          <li>Monthly resume review by our team <span style="font-size:10px;color:var(--warn);font-weight:700;">Soon</span></li>
         </ul>
         <div style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:10px;">🔒 Price locked for life. Cancel anytime.</div>
         <button class="plan-btn" style="border-color:rgba(52,211,153,0.5);color:var(--success);" id="agencyBuyBtn" onclick="handleAgencyCheckout()">Get Agency — Lock in $15.99 →</button>
@@ -1242,16 +1242,16 @@ function toggleBilling() {
 }
 function handleProCheckout() {
   if (billingAnnual) {
-    // TODO: replace with your Stripe annual Pro link
-    alert('Annual plan coming soon! Use monthly for now — same founding-member rate.');
+    showToast('Annual plans coming soon — taking you to monthly at the same founding rate.');
+    setTimeout(() => window.open('https://buy.stripe.com/9B68wO1Gx0yuacvbuF43S00','_blank'), 900);
   } else {
     window.open('https://buy.stripe.com/9B68wO1Gx0yuacvbuF43S00','_blank');
   }
 }
 function handleAgencyCheckout() {
   if (billingAnnual) {
-    // TODO: replace with your Stripe annual Agency link
-    alert('Annual plan coming soon! Use monthly for now — same founding-member rate.');
+    showToast('Annual plans coming soon — taking you to monthly at the same founding rate.');
+    setTimeout(() => window.open('https://buy.stripe.com/5kQ28q4SJgxs84n7ep43S01','_blank'), 900);
   } else {
     window.open('https://buy.stripe.com/5kQ28q4SJgxs84n7ep43S01','_blank');
   }
@@ -1269,8 +1269,8 @@ function handleAgencyCheckout() {
     <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What is the Job Dissection report? <span class="faq-arrow">▼</span></button><div class="faq-a">The dissection reads between the lines of any job post and gives you: what the client actually wants, hidden requirements, red flags, ideal rate range, competition estimate, and 3 specific angles to stand out. The proposal then uses all of this to be hyper-targeted.</div></div>
     <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Will clients know I used AI? <span class="faq-arrow">▼</span></button><div class="faq-a">Howdy Resume avoids generic AI phrasing and writes in a natural, human tone. We recommend reviewing and adding one personal touch before sending. The dissection feature ensures the content is specific enough to your job that it won't read as generic.</div></div>
     <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What freelance platforms does it work with? <span class="faq-arrow">▼</span></button><div class="faq-a">Works with any platform: Upwork, Fiverr, Freelancer.com, Toptal, PeoplePerHour, LinkedIn, Indeed, and direct client outreach. Just paste the job description and go.</div></div>
-    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-arrow">▼</span></button><div class="faq-a">Yes — cancel anytime from your account settings, no fees, no questions. You keep access until the end of your billing period.</div></div>
-    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Is my data secure? <span class="faq-arrow">▼</span></button><div class="faq-a">We don't store your job posts or proposals. Each generation is processed in real time and discarded. Account data is encrypted and never shared or sold.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-arrow">▼</span></button><div class="faq-a">Yes — cancel anytime through Stripe's billing portal (link in your receipt email) or email us at howdyresume@gmail.com and we'll handle it same day. No fees, no questions. You keep access until the end of your billing period.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Is my data secure? <span class="faq-arrow">▼</span></button><div class="faq-a">We don't store your job posts or proposals on our servers — each generation is processed in real time and discarded. Your account info is stored locally in your browser and is never shared or sold.</div></div>
   </div>
 
   <!-- Industry Examples -->
@@ -1304,7 +1304,7 @@ function handleAgencyCheckout() {
       <button class="footer-link" onclick="openModal('privacy')">Privacy</button>
       <button class="footer-link" onclick="openModal('terms')">Terms</button>
     </div>
-    <div class="footer-copy">© 2025 Howdy Resume. All rights reserved. &nbsp;|&nbsp; <span style="opacity:0.5;">v1.7.0</span></div>
+    <div class="footer-copy">© 2026 Howdy Resume. All rights reserved. &nbsp;|&nbsp; <span style="opacity:0.5;">v1.7.0</span></div>
   </footer>
 </div>
 
@@ -1592,23 +1592,21 @@ function handleAgencyCheckout() {
 <div class="referral-wrap" style="padding-top:32px;">
   <div class="referral-card">
     <div class="ref-icon">🎁</div>
-    <div class="ref-title">Refer a friend, get a free month</div>
-    <div class="ref-sub">Share your unique link. Every friend who upgrades to Pro earns you one free month — no limit on how many you can earn.</div>
+    <div class="ref-title">Referral program — coming soon</div>
+    <div class="ref-sub">We're building this now. When it launches: refer a friend who upgrades to Pro and earn one free month — with no cap on how many you can earn.</div>
+    <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:var(--muted);line-height:1.6;">
+      <span style="font-weight:700;color:var(--warn);">🔧 In development</span> — Referral tracking, credit automation, and payout system are being built. In the meantime, if you refer someone who subscribes, email us at <strong style="color:var(--text);">howdyresume@gmail.com</strong> and we'll manually credit your account.
+    </div>
     <div class="ref-link-row">
       <input class="ref-link-input" id="refLink" readonly value="https://howdyresume.com/ref/loading..." />
       <button class="ref-copy-btn" onclick="copyRefLink()">Copy link</button>
     </div>
-    <div class="ref-stats">
-      <div class="ref-stat"><div class="ref-stat-num" id="refClicks">0</div><div class="ref-stat-label">Link clicks</div></div>
-      <div class="ref-stat"><div class="ref-stat-num" id="refSignups">0</div><div class="ref-stat-label">Sign-ups</div></div>
-      <div class="ref-stat"><div class="ref-stat-num" id="refEarned">0</div><div class="ref-stat-label">Free months earned</div></div>
-    </div>
     <div class="ref-how">
-      <div class="ref-how-title">How it works</div>
-      <div class="ref-step"><div class="ref-step-num">1</div>Copy your unique referral link above.</div>
-      <div class="ref-step"><div class="ref-step-num">2</div>Share it with freelancers — Twitter, Reddit, Discord, DMs, anywhere.</div>
-      <div class="ref-step"><div class="ref-step-num">3</div>When your friend upgrades to any paid plan, you automatically get one free month added.</div>
-      <div class="ref-step"><div class="ref-step-num">4</div>No limit — refer 12 friends, get a whole year free.</div>
+      <div class="ref-how-title">How it will work</div>
+      <div class="ref-step"><div class="ref-step-num">1</div>Copy your unique referral link above and share it anywhere.</div>
+      <div class="ref-step"><div class="ref-step-num">2</div>When your friend upgrades to any paid plan, you earn one free month.</div>
+      <div class="ref-step"><div class="ref-step-num">3</div>No limit — refer 12 friends, get a whole year free.</div>
+      <div class="ref-step"><div class="ref-step-num">4</div>Until automated tracking is live: just email us and we'll credit you manually.</div>
     </div>
   </div>
 </div>
@@ -1749,7 +1747,7 @@ function handleAgencyCheckout() {
   <div class="modal" id="forgotModal" style="display:none;">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">Reset your password</div>
-    <div class="modal-sub">Enter your email and we'll send a reset link.</div>
+    <div class="modal-sub">Enter your email and we'll get back to you at howdyresume@gmail.com within a few hours.</div>
     <div class="modal-field"><label class="modal-label">Email</label><input type="email" id="forgotEmail" placeholder="you@email.com" /></div>
     <div class="modal-error" id="forgotError"></div>
     <div id="forgotSuccess" style="display:none;font-size:13px;color:var(--success);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:8px;padding:10px 14px;margin-top:8px;">Reset link sent! Check your email inbox.</div>
@@ -3652,12 +3650,9 @@ async function handleForgotPassword(){
   const email=document.getElementById('forgotEmail').value.trim();
   document.getElementById('forgotError').style.display='none';
   if(!email||!email.includes('@')){showModalError('forgotError','Please enter a valid email.');return;}
-  const users=JSON.parse(localStorage.getItem('pai_users')||'{}');
-  // Show success regardless (security best practice — don't reveal if email exists)
   document.getElementById('forgotSuccess').style.display='block';
+  document.getElementById('forgotSuccess').textContent='Email us at howdyresume@gmail.com with your account email and we\'ll reset your password within a few hours.';
   document.querySelector('#forgotModal .modal-btn').style.display='none';
-  // In production: trigger email via your backend/Resend/SendGrid
-  showToast('Reset link sent! (Connect email service to go live)');
 }
 
 function signOut(){
@@ -7879,8 +7874,8 @@ function renderTrackerBoard() {
       <input id="exitEmail" type="email" placeholder="your@email.com" style="flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font-body);font-size:14px;padding:12px 14px;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'" onkeydown="if(event.key==='Enter')submitExitIntent()">
       <button onclick="submitExitIntent()" style="padding:12px 20px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">Send it →</button>
     </div>
-    <div id="exitThanks" style="display:none;color:var(--success);font-size:14px;font-weight:600;padding:10px;">✓ Check your inbox! Also — your first 3 optimizations are free inside Howdy Resume.</div>
-    <div style="font-size:11px;color:var(--muted2);margin-top:8px;">No spam. Unsubscribe anytime. ~500 people already grabbed this.</div>
+    <div id="exitThanks" style="display:none;color:var(--success);font-size:14px;font-weight:600;padding:10px;">✓ Got it! Your first 3 resume optimizations are free inside Howdy Resume.</div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:8px;">No spam. Unsubscribe anytime.</div>
   </div>
 </div>
 
