@@ -6844,7 +6844,16 @@ function renderBuildLoadOptions() {
 function loadSavedResumeIntoBuild() {
   const select = document.getElementById('buildLoadSelect');
   if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
-  loadSavedResume(Number(select.value));
+  const saved = getSavedResumes();
+  const r = saved.find(s => Number(s.id) === Number(select.value));
+  if (!r || !r.data) { showToast('Resume not found.'); return; }
+  fillBuilderFromResumeData(r.data);
+  if (r.style) selectStyle(r.style);
+  if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b => b.classList.remove('active')); }
+  lastResumeScore = r.score || null;
+  updateResumeScoreBadge(lastResumeScore);
+  renderPreview();
+  showToast('Loaded: ' + r.name);
 }
 
 function renderJobMatchLoadOptions() {
@@ -6909,8 +6918,8 @@ function saveCurrentResume() {
 
 function loadSavedResume(id) {
   const saved = getSavedResumes();
-  const r = saved.find(s => s.id === id);
-  if (!r) return;
+  const r = saved.find(s => Number(s.id) === Number(id));
+  if (!r) { showToast('Resume not found.'); return; }
   const d = r.data;
   const set = (elId, val) => { const el = document.getElementById(elId); if(el && val!==undefined) el.value = val; };
   set('rb-name', d.name); set('rb-title', d.title); set('rb-email', d.email);
