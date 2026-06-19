@@ -5642,7 +5642,7 @@ function downloadResumePDF() {
   const data = getResumeData();
   if (!data.name) { showToast('Add your name first.'); return; }
   if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
-  if (rbStyle === 'classic' || rbStyle === 'classic2') { exportClassicResumePDF(data); return; }
+  if (rbStyle === 'classic') { exportClassicResumePDF(data); return; }
   // For all styled templates, print the actual rendered HTML so the PDF matches the preview exactly
   printStyledResumePDF(data);
 }
@@ -7095,7 +7095,7 @@ async function exportImprovedResume() {
   if (checkOptimizerPlaceholders(text).length) { showToast('Fill in all placeholder details before exporting.'); return; }
   const data = await parseOptimizedResumeText(text);
   if (!data) return;
-  if (rbStyle === 'classic' || rbStyle === 'classic2') exportClassicResumePDF(data);
+  if (rbStyle === 'classic') exportClassicResumePDF(data);
   else printStyledResumePDF(data);
 }
 
@@ -7369,7 +7369,7 @@ async function downloadResumeDOCX() {
   if (!data.name) { showToast('Add your name first.'); return; }
   if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
   if (typeof JSZip === 'undefined') { showToast('Word export library is still loading. Try again in a moment.'); return; }
-  if (rbStyle === 'classic' || rbStyle === 'classic2') { await downloadClassicResumeDOCX(data); return; }
+  if (rbStyle === 'classic') { await downloadClassicResumeDOCX(data); return; }
 
   const esc = (v) => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const para = (text, opts = {}) => {
