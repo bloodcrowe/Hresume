@@ -2575,7 +2575,15 @@ function handleAgencyCheckout() {
             </div>
             <textarea class="rb-textarea" id="ap-resume" placeholder="Paste your resume text, load from My Resumes, or pull from the Builder..." style="min-height:120px;"></textarea>
           </div>
-          <div class="rb-field"><label class="rb-label">Job Description</label><textarea class="rb-textarea" id="ap-job" placeholder="Paste the full job description..." style="min-height:120px;"></textarea></div>
+          <div class="rb-field">
+            <label class="rb-label" style="display:block;margin-bottom:6px;">Job Description</label>
+            <div class="url-row" style="margin-bottom:8px;">
+              <input type="text" class="rb-input" id="apJobUrl" placeholder="Paste job posting URL to auto-import..." style="font-size:13px;">
+              <button class="import-btn" onclick="importAppPackJob()">Import →</button>
+            </div>
+            <div class="opt-or">— or paste job description —</div>
+            <textarea class="rb-textarea" id="ap-job" placeholder="Paste the full job description..." style="min-height:120px;"></textarea>
+          </div>
           <div class="rb-row">
             <div class="rb-field"><label class="rb-label">Company</label><input class="rb-input" id="ap-company" placeholder="Company name"></div>
             <div class="rb-field"><label class="rb-label">Role</label><input class="rb-input" id="ap-role" placeholder="Job title"></div>
@@ -6794,6 +6802,38 @@ async function importJMJob() {
       'You are a job posting extractor. Return only the relevant job description content, cleanly formatted.'
     );
     document.getElementById('jmJobText').value = extracted;
+    showToast('Job posting imported!');
+  } catch(e) {
+    console.error('Import error:', e);
+    showToast('Could not import URL — paste the job description manually.');
+  }
+}
+
+async function importAppPackJob() {
+  const url = document.getElementById('apJobUrl').value.trim();
+  if (!url) { showToast('Paste a job posting URL first.'); return; }
+  showToast('Fetching job posting...');
+  try {
+    const fetchResp = await fetch(CONFIG.API_PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'fetch-url', url })
+    });
+    const fetchData = await fetchResp.json();
+    if (!fetchResp.ok || !fetchData.text) throw new Error(fetchData.error || 'Could not fetch URL');
+    showToast('Extracting job description...');
+    const extracted = await callAI(
+      'Below is raw text scraped from a job posting page. Extract ONLY the job title, company, responsibilities, requirements, and qualifications. Remove navigation, ads, footers, and unrelated content. Return clean readable job description text only.\n\n---\n' + fetchData.text,
+      'You are a job posting extractor. Return only the relevant job description content, cleanly formatted. No markdown.'
+    );
+    document.getElementById('ap-job').value = extracted;
+    // Auto-fill company/role if empty
+    const companyEl = document.getElementById('ap-company');
+    const roleEl = document.getElementById('ap-role');
+    if (!companyEl.value || !roleEl.value) {
+      const match = extracted.match(/^(.+?)\n/);
+      if (match && !roleEl.value) roleEl.value = match[1].trim().replace(/^(job title|role|position):?\s*/i, '');
+    }
     showToast('Job posting imported!');
   } catch(e) {
     console.error('Import error:', e);
