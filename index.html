@@ -1655,7 +1655,7 @@ function handleAgencyCheckout() {
       <div class="upgrade-card" id="upgradeCardAgency" onclick="selectUpgradePlan('agency')">
         <div class="upgrade-plan-name">Agency</div>
         <div class="upgrade-plan-price">$15.99<span>/mo</span></div>
-        <div class="upgrade-features">Everything in Pro · Unlimited history · Priority AI · Templates · Client research · Weekly job alerts · Monthly resume review</div>
+        <div class="upgrade-features">Everything in Pro · Unlimited history · Priority support · Early access to new features (Priority AI, Templates, Client research, Weekly alerts — coming soon)</div>
       </div>
     </div>
     <button class="modal-btn" onclick="handleUpgrade()">Continue to payment →</button>
@@ -1721,7 +1721,7 @@ function handleAgencyCheckout() {
       <p style="margin-bottom:12px;"><strong style="color:var(--text);">2. How We Use Your Information</strong><br>Your email is used solely to manage your account and send account-related communications. We do not sell, share, or rent your personal information to third parties.</p>
       <p style="margin-bottom:12px;"><strong style="color:var(--text);">3. Payments</strong><br>Payment processing is handled securely by Stripe. We do not store your payment card information.</p>
       <p style="margin-bottom:12px;"><strong style="color:var(--text);">4. Cookies</strong><br>We use localStorage to maintain your login session and preferences. No third-party tracking cookies are used.</p>
-      <p style="margin-bottom:12px;"><strong style="color:var(--text);">5. Data Security</strong><br>Your account data is encrypted. We implement industry-standard security measures to protect your information.</p>
+      <p style="margin-bottom:12px;"><strong style="color:var(--text);">5. Data Security</strong><br>Your account data is stored locally in your browser and is never shared with third parties. We implement reasonable measures to protect your information.</p>
       <p style="margin-bottom:12px;"><strong style="color:var(--text);">6. Your Rights</strong><br>You may request deletion of your account and associated data at any time by contacting us at privacy@howdyresume.com.</p>
       <p><strong style="color:var(--text);">7. Contact</strong><br>Questions? Email us at privacy@howdyresume.com</p>
     </div>
@@ -1750,7 +1750,7 @@ function handleAgencyCheckout() {
     <div class="modal-sub">Enter your email and we'll get back to you at howdyresume@gmail.com within a few hours.</div>
     <div class="modal-field"><label class="modal-label">Email</label><input type="email" id="forgotEmail" placeholder="you@email.com" /></div>
     <div class="modal-error" id="forgotError"></div>
-    <div id="forgotSuccess" style="display:none;font-size:13px;color:var(--success);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:8px;padding:10px 14px;margin-top:8px;">Reset link sent! Check your email inbox.</div>
+    <div id="forgotSuccess" style="display:none;font-size:13px;color:var(--success);background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:8px;padding:10px 14px;margin-top:8px;">Email us at howdyresume@gmail.com with your account email and we'll reset your password within a few hours.</div>
     <button class="modal-btn" onclick="handleForgotPassword()">Send reset link →</button>
     <div class="modal-switch"><a onclick="openModal('login')">← Back to sign in</a></div>
   </div>
