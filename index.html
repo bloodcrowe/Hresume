@@ -6152,25 +6152,10 @@ async function runLinkedInScore() {
 
 function liPullFromBuilder() {
   const data = getResumeData();
-  const lines = [];
-  if (data.name) lines.push(data.name + (data.title ? ' — ' + data.title : ''));
-  if (data.summary) lines.push('\nSUMMARY\n' + data.summary);
-  if (data.experiences.length) {
-    lines.push('\nEXPERIENCE');
-    data.experiences.forEach(e => {
-      if (e.company || e.role) {
-        lines.push((e.company || '') + (e.role ? ', ' + e.role : '') + (e.start ? ' (' + e.start + (e.end ? '–' + e.end : '') + ')' : ''));
-        if (e.desc) lines.push(e.desc);
-      }
-    });
-  }
-  if (data.skills.length) lines.push('\nSKILLS\n' + data.skills.join(', '));
-  if (data.educations.length) {
-    lines.push('\nEDUCATION');
-    data.educations.forEach(e => { if (e.school) lines.push(e.school + (e.degree ? ', ' + e.degree : '')); });
-  }
-  document.getElementById('li-resume').value = lines.join('\n');
-  showToast('Resume pulled from builder!');
+  const text = buildResumePlainText(data);
+  if (!text.trim()) { showToast('Nothing in the Builder yet — fill in your resume first.'); return; }
+  document.getElementById('li-resume').value = text;
+  showToast('Resume pulled from Builder!');
 }
 
 async function runLinkedInOptimize() {
