@@ -2125,6 +2125,12 @@ function handleAgencyCheckout() {
           <div style="font-size:11px;color:var(--muted2);margin-top:4px;">PDF, DOCX, or TXT</div>
         </div>
         <input type="file" id="jm-file-input" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleJMFileSelect(this)">
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+          <select class="rb-input" id="jmLoadSelect" style="flex:1;">
+            <option value="">Load from My Resumes...</option>
+          </select>
+          <button class="rb-download-btn" onclick="loadSavedResumeIntoJobMatch()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+        </div>
         <textarea id="jmResumeText" class="rb-textarea" style="min-height:120px;" placeholder="Paste your resume here (or drop a file above)..."></textarea>
         <div class="opt-section-title" style="margin-top:6px;">Job Posting</div>
         <div class="url-row" style="margin-bottom:8px;">
@@ -5474,6 +5480,7 @@ function switchResumeTab(tab, btn) {
   }
   if (tab === 'build') { renderPreview(); renderBuildLoadOptions(); }
   if (tab === 'optimize') { renderOptimizerSavedResumeOptions(); checkOptimizerPlaceholders(); }
+  if (tab === 'jobmatch') { renderJobMatchLoadOptions(); }
   if (tab === 'myresumes') renderSavedResumes();
   if (tab === 'references') renderRefList();
 }
@@ -5898,6 +5905,7 @@ function confirmSaveOptimizedResume() {
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
+  renderJobMatchLoadOptions();
   closeModal();
   _saveOptData = null;
   showToast('Saved: ' + name);
@@ -6481,6 +6489,27 @@ function loadSavedResumeIntoBuild() {
   loadSavedResume(Number(select.value));
 }
 
+function renderJobMatchLoadOptions() {
+  const select = document.getElementById('jmLoadSelect');
+  if (!select) return;
+  const saved = getSavedResumes();
+  select.innerHTML = '<option value="">Load from My Resumes...</option>' + saved.map(r => {
+    const score = r.score ? ' — Score ' + r.score.score + '/100' : '';
+    return '<option value="' + r.id + '">' + escapeResumeHTML(r.name || 'Saved Resume') + score + '</option>';
+  }).join('');
+}
+
+function loadSavedResumeIntoJobMatch() {
+  const select = document.getElementById('jmLoadSelect');
+  if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
+  const saved = getSavedResumes();
+  const r = saved.find(s => Number(s.id) === Number(select.value));
+  if (!r || !r.data) { showToast('Saved resume not found.'); return; }
+  const ta = document.getElementById('jmResumeText');
+  if (ta) ta.value = buildResumePlainText(r.data);
+  showToast('Loaded: ' + r.name);
+}
+
 function saveCurrentResume() {
   const data = getResumeData();
   if (!data.name) { showToast('Add your name before saving.'); return; }
@@ -6491,6 +6520,7 @@ function saveCurrentResume() {
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
+  renderJobMatchLoadOptions();
   showToast('Resume saved: ' + name);
 }
 
@@ -6567,6 +6597,7 @@ function deleteSavedResume(id) {
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
   renderBuildLoadOptions();
+  renderJobMatchLoadOptions();
   showToast('Deleted.');
 }
 
