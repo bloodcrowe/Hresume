@@ -2565,12 +2565,15 @@ function handleAgencyCheckout() {
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.55;">Paste a job description and your resume — get a tailored resume, cover letter, and top interview questions all at once.</div>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div class="rb-field">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <label class="rb-label">Your Resume</label>
-              <button onclick="apPullFromBuilder()" title="Auto-fills from your Resume Builder" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(124,106,255,.4);background:rgba(124,106,255,.08);color:var(--accent2);cursor:pointer;font-family:var(--font-body);">↑ Pull from Builder</button>
+            <label class="rb-label" style="display:block;margin-bottom:6px;">Your Resume</label>
+            <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+              <select class="rb-input" id="apLoadSelect" style="flex:1;">
+                <option value="">Load from My Resumes...</option>
+              </select>
+              <button class="rb-download-btn" onclick="apLoadFromSaved()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+              <button onclick="apPullFromBuilder()" title="Pull live from Builder form" style="white-space:nowrap;font-size:11px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid rgba(124,106,255,.4);background:rgba(124,106,255,.08);color:var(--accent2);cursor:pointer;font-family:var(--font-body);">↑ Builder</button>
             </div>
-            <textarea class="rb-textarea" id="ap-resume" placeholder="Paste your resume text or pull from the builder..." style="min-height:120px;"></textarea>
-            <div style="font-size:11px;color:var(--muted2);margin-top:4px;">💡 Built a resume in the <strong style="color:var(--muted);">Resumes</strong> tab? Hit "Pull from Builder" to auto-fill it here.</div>
+            <textarea class="rb-textarea" id="ap-resume" placeholder="Paste your resume text, load from My Resumes, or pull from the Builder..." style="min-height:120px;"></textarea>
           </div>
           <div class="rb-field"><label class="rb-label">Job Description</label><textarea class="rb-textarea" id="ap-job" placeholder="Paste the full job description..." style="min-height:120px;"></textarea></div>
           <div class="rb-row">
@@ -5922,6 +5925,7 @@ function confirmSaveOptimizedResume() {
   renderBuildLoadOptions();
   renderJobMatchLoadOptions();
   renderInterviewLoadOptions();
+  renderAppPackLoadOptions();
   closeModal();
   _saveOptData = null;
   showToast('Saved: ' + name);
@@ -6128,6 +6132,7 @@ function switchCareerTab(tab, btn) {
   if (btn) btn.classList.add('active');
   const panel = document.getElementById('ct-' + tab);
   if (panel) panel.classList.add('active');
+  if (tab === 'apppack') renderAppPackLoadOptions();
 }
 
 // ── Thank You Email ──
@@ -6300,21 +6305,30 @@ async function runNetworkEmail() {
 // ── One-Click Application Pack ──
 function apPullFromBuilder() {
   const data = getResumeData();
-  const lines = [];
-  if (data.name) lines.push(data.name + (data.title ? ' — ' + data.title : ''));
-  if (data.summary) lines.push('\nSUMMARY\n' + data.summary);
-  if (data.experiences.length) {
-    lines.push('\nEXPERIENCE');
-    data.experiences.forEach(e => {
-      if (e.company || e.role) {
-        lines.push((e.company||'') + (e.role ? ', '+e.role : '') + (e.start?' ('+e.start+(e.end?'–'+e.end:'')+')</':''));
-        if (e.desc) lines.push(e.desc);
-      }
-    });
-  }
-  if (data.skills.length) lines.push('\nSKILLS\n' + data.skills.join(', '));
-  document.getElementById('ap-resume').value = lines.join('\n');
-  showToast('Resume pulled from builder!');
+  const text = buildResumePlainText(data);
+  if (!text.trim()) { showToast('Nothing in the Builder yet — fill in your resume first.'); return; }
+  document.getElementById('ap-resume').value = text;
+  showToast('Pulled from Builder!');
+}
+
+function renderAppPackLoadOptions() {
+  const select = document.getElementById('apLoadSelect');
+  if (!select) return;
+  const saved = getSavedResumes();
+  select.innerHTML = '<option value="">Load from My Resumes...</option>' + saved.map(r => {
+    const score = r.score ? ' — Score ' + r.score.score + '/100' : '';
+    return '<option value="' + r.id + '">' + escapeResumeHTML(r.name || 'Saved Resume') + score + '</option>';
+  }).join('');
+}
+
+function apLoadFromSaved() {
+  const select = document.getElementById('apLoadSelect');
+  if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
+  const saved = getSavedResumes();
+  const r = saved.find(s => Number(s.id) === Number(select.value));
+  if (!r || !r.data) { showToast('Saved resume not found.'); return; }
+  document.getElementById('ap-resume').value = buildResumePlainText(r.data);
+  showToast('Loaded: ' + r.name);
 }
 
 async function runAppPack() {
@@ -6560,6 +6574,7 @@ function saveCurrentResume() {
   renderBuildLoadOptions();
   renderJobMatchLoadOptions();
   renderInterviewLoadOptions();
+  renderAppPackLoadOptions();
   showToast('Resume saved: ' + name);
 }
 
@@ -6638,6 +6653,7 @@ function deleteSavedResume(id) {
   renderBuildLoadOptions();
   renderJobMatchLoadOptions();
   renderInterviewLoadOptions();
+  renderAppPackLoadOptions();
   showToast('Deleted.');
 }
 
