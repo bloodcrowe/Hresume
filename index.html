@@ -1718,7 +1718,7 @@ function handleAgencyCheckout() {
   </div>
 
   <!-- SAVE OPTIMIZED RESUME -->
-  <div class="modal" id="saveOptModal" style="display:none;max-width:400px;">
+  <div class="modal" id="saveOptModal" style="display:none;max-width:420px;">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">💾 Save to My Resumes</div>
     <div class="modal-field">
@@ -1728,6 +1728,16 @@ function handleAgencyCheckout() {
     <div class="modal-field">
       <label class="modal-label">Template Style</label>
       <select class="rb-input" id="saveOptStyle" style="width:100%;box-sizing:border-box;margin-top:4px;"></select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="modal-field">
+      <div>
+        <label class="modal-label">Applied to Company <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input type="text" class="rb-input" id="saveOptCompany" placeholder="e.g. Acme Corp" style="width:100%;box-sizing:border-box;margin-top:4px;">
+      </div>
+      <div>
+        <label class="modal-label">Role Applied For <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input type="text" class="rb-input" id="saveOptRole" placeholder="e.g. Senior Designer" style="width:100%;box-sizing:border-box;margin-top:4px;">
+      </div>
     </div>
     <button class="modal-btn" onclick="confirmSaveOptimizedResume()">Save Resume →</button>
   </div>
@@ -2143,6 +2153,7 @@ function handleAgencyCheckout() {
         </div>
         <input type="file" id="jm-job-file-input" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleJMJobFileSelect(this)">
         <textarea id="jmJobText" class="rb-textarea" style="min-height:120px;" placeholder="Paste the full job description here...&#10;&#10;Include requirements, responsibilities, skills listed — everything helps."></textarea>
+        <div id="jmSalaryBadge" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);font-size:12px;color:var(--success);font-weight:600;"></div>
         <div style="margin:10px 0 6px;font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">List Style for Experience</div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
           <button class="bullet-style-btn active" data-style="bullet" onclick="selectBulletStyle(this,'jm')">• Bullets</button>
@@ -2272,6 +2283,13 @@ function handleAgencyCheckout() {
 
   <!-- ── LINKEDIN OPTIMIZER TAB ── -->
   <div class="rp-panel" id="rp-linkedin">
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="bullet-style-btn active" id="li-mode-optimize" onclick="setLiMode('optimize',this)">✦ Optimizer</button>
+      <button class="bullet-style-btn" id="li-mode-score" onclick="setLiMode('score',this)">📊 Profile Scorer</button>
+    </div>
+
+    <!-- OPTIMIZER MODE -->
+    <div id="li-optimizer-wrap">
     <div class="opt-layout">
       <!-- Left: inputs -->
       <div class="opt-panel">
@@ -2313,6 +2331,38 @@ function handleAgencyCheckout() {
         <div id="li-output" style="display:none;padding:16px;display:flex;flex-direction:column;gap:0;"></div>
       </div>
     </div>
+    </div><!-- end li-optimizer-wrap -->
+
+    <!-- SCORER MODE -->
+    <div id="li-scorer-wrap" style="display:none;">
+      <div class="opt-layout">
+        <div class="opt-panel">
+          <div class="opt-section-title">LinkedIn Profile Scorer</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.55;">Paste your current LinkedIn profile text (headline, about, experience bullets). Get a score with actionable improvements.</div>
+          <div class="rb-field" style="margin-bottom:10px;">
+            <label class="rb-label">Your Headline</label>
+            <input class="rb-input" id="lis-headline" placeholder="e.g. Senior Product Manager | SaaS | B2B Growth">
+          </div>
+          <div class="rb-field" style="margin-bottom:10px;">
+            <label class="rb-label">Your About Section</label>
+            <textarea class="rb-textarea" id="lis-about" placeholder="Paste your LinkedIn About section here..." style="min-height:120px;"></textarea>
+          </div>
+          <div class="rb-field" style="margin-bottom:10px;">
+            <label class="rb-label">Target Role / Industry</label>
+            <input class="rb-input" id="lis-target" placeholder="e.g. UX Designer, Tech Startup">
+          </div>
+          <button class="opt-run-btn" id="lis-run-btn" onclick="runLinkedInScore()">📊 Score My LinkedIn Profile</button>
+        </div>
+        <div class="opt-panel">
+          <div class="opt-empty" id="lis-empty">
+            <div style="font-size:32px;margin-bottom:10px;">📊</div>
+            Paste your headline and About section to get a score and specific fixes.
+          </div>
+          <div id="lis-output" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- end rp-linkedin -->
 
   <!-- ── REFERENCES TAB ── -->
@@ -2583,6 +2633,7 @@ function handleAgencyCheckout() {
             </div>
             <div class="opt-or">— or paste job description —</div>
             <textarea class="rb-textarea" id="ap-job" placeholder="Paste the full job description..." style="min-height:120px;"></textarea>
+            <div id="apSalaryBadge" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);font-size:12px;color:var(--success);font-weight:600;"></div>
           </div>
           <div class="rb-row">
             <div class="rb-field"><label class="rb-label">Company</label><input class="rb-input" id="ap-company" placeholder="Company name"></div>
@@ -5916,6 +5967,10 @@ async function saveOptimizedResume() {
   if (styleEl) {
     styleEl.innerHTML = TEMPLATE_STYLES.map(t => '<option value="' + t.key + '"' + (rbStyle === t.key ? ' selected' : '') + '>' + t.label + '</option>').join('');
   }
+  const compEl = document.getElementById('saveOptCompany');
+  const rolEl = document.getElementById('saveOptRole');
+  if (compEl) compEl.value = '';
+  if (rolEl) rolEl.value = '';
   openModal('saveOpt');
 }
 
@@ -5925,8 +5980,10 @@ function confirmSaveOptimizedResume() {
   const styleEl = document.getElementById('saveOptStyle');
   const name = (nameEl?.value || '').trim() || (_saveOptData.name + ' - Optimized Resume');
   const chosenStyle = styleEl?.value || rbStyle;
+  const appliedCompany = document.getElementById('saveOptCompany')?.value.trim() || '';
+  const appliedRole = document.getElementById('saveOptRole')?.value.trim() || '';
   const saved = getSavedResumes();
-  saved.unshift({ id: Date.now(), name, style: chosenStyle, color: rbAccentColor, data: _saveOptData, score: optBaselineScore || lastResumeScore, savedAt: new Date().toLocaleDateString() });
+  saved.unshift({ id: Date.now(), name, style: chosenStyle, color: rbAccentColor, data: _saveOptData, score: optBaselineScore || lastResumeScore, savedAt: new Date().toLocaleDateString(), appliedCompany, appliedRole });
   setSavedResumes(saved.slice(0, 20));
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
@@ -6036,6 +6093,63 @@ function downloadCoverLetterPDF() {
 }
 
 // ══ LINKEDIN OPTIMIZER ══
+function setLiMode(mode, btn) {
+  document.querySelectorAll('#li-mode-optimize,#li-mode-score').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('li-optimizer-wrap').style.display = mode === 'optimize' ? '' : 'none';
+  document.getElementById('li-scorer-wrap').style.display = mode === 'score' ? '' : 'none';
+}
+
+async function runLinkedInScore() {
+  const headline = document.getElementById('lis-headline').value.trim();
+  const about = document.getElementById('lis-about').value.trim();
+  const target = document.getElementById('lis-target').value.trim();
+  if (!headline && !about) { showToast('Paste your headline or About section first.'); return; }
+  const btn = document.getElementById('lis-run-btn');
+  btn.disabled = true; btn.textContent = 'Scoring...';
+  document.getElementById('lis-empty').style.display = 'none';
+  document.getElementById('lis-output').style.display = 'none';
+  const sys = 'LinkedIn profile scorer. Return JSON ONLY: {"score":0-100,"grade":"A|B|C|D","headline":{"score":0-25,"feedback":"..."},"about":{"score":0-25,"feedback":"..."},"keywords":{"score":0-25,"feedback":"..."},"completeness":{"score":0-25,"feedback":"..."},"topFixes":["fix1","fix2","fix3"]}';
+  const msg = 'Score this LinkedIn profile' + (target ? ' for a ' + target + ' role' : '') + '.\n\nHeadline: ' + (headline || 'Not provided') + '\n\nAbout:\n' + (about || 'Not provided');
+  try {
+    const raw = await callAI(msg, sys);
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('bad json');
+    const d = JSON.parse(match[0]);
+    const score = d.score || 0;
+    const color = score >= 80 ? 'var(--success)' : score >= 60 ? '#fbbf24' : 'var(--warn)';
+    const out = document.getElementById('lis-output');
+    out.innerHTML = `
+      <div style="text-align:center;margin-bottom:16px;">
+        <svg viewBox="0 0 120 120" width="100" height="100" style="transform:rotate(-90deg);">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--surface2)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="${color}" stroke-width="10"
+            stroke-dasharray="${Math.round(2*Math.PI*50)}" stroke-dashoffset="${Math.round(2*Math.PI*50*(1-score/100))}" stroke-linecap="round"/>
+        </svg>
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:${color};margin-top:-68px;position:relative;z-index:1;">${score}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:52px;font-weight:600;">LinkedIn Profile Score</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        ${[['Headline',d.headline],['About',d.about],['Keywords',d.keywords],['Completeness',d.completeness]].map(([label,cat])=>`
+          <div style="background:var(--surface2);border-radius:10px;padding:10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;margin-bottom:4px;">${label}</div>
+            <div style="font-size:18px;font-weight:800;color:${cat?.score>=20?'var(--success)':cat?.score>=12?'#fbbf24':'var(--warn)'};">${cat?.score||0}<span style="font-size:11px;color:var(--muted)">/25</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;">${escapeResumeHTML(cat?.feedback||'')}</div>
+          </div>`).join('')}
+      </div>
+      <div style="background:rgba(124,106,255,.08);border:1px solid rgba(124,106,255,.2);border-radius:10px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px;">⚡ Top Fixes</div>
+        ${(d.topFixes||[]).map(f=>`<div style="font-size:12px;color:var(--text);margin-bottom:6px;padding-left:14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent2);">→</span> ${escapeResumeHTML(f)}</div>`).join('')}
+      </div>`;
+    out.style.display = 'block';
+    showToast('Profile scored!');
+  } catch(e) {
+    document.getElementById('lis-empty').style.display = 'block';
+    showToast('Scoring failed. Try again.');
+  }
+  btn.disabled = false; btn.textContent = '📊 Score My LinkedIn Profile';
+}
+
 function liPullFromBuilder() {
   const data = getResumeData();
   const lines = [];
@@ -6676,17 +6790,21 @@ function renderSavedResumes() {
     el.innerHTML = '<div class="opt-empty" style="margin-top:0;"><div style="font-size:32px;margin-bottom:10px;">💾</div>No saved resumes yet. Build one in the Build tab and save it here.</div>';
     return;
   }
-  el.innerHTML = saved.map(r => `
+  el.innerHTML = saved.map(r => {
+    const jobTag = (r.appliedCompany || r.appliedRole) ? `<span style="display:inline-block;margin-top:4px;padding:2px 8px;border-radius:6px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);color:#60a5fa;font-size:10px;font-weight:600;">${[r.appliedRole, r.appliedCompany].filter(Boolean).join(' @ ')}</span>` : '';
+    return `
     <div class="saved-resume-card">
       <div>
-        <div class="saved-resume-name">${r.name}</div>
+        <div class="saved-resume-name">${escapeResumeHTML(r.name)}</div>
         <div class="saved-resume-meta">Saved ${r.savedAt} · ${r.style||'modern'} style${r.score ? ' · Score ' + r.score.score + '/100' + (r.score.grade ? ' (' + r.score.grade + ')' : '') : ''}</div>
+        ${jobTag}
       </div>
       <div class="saved-resume-actions">
         <button class="cl-copy-btn" onclick="loadSavedResume(${r.id})">Load</button>
         <button class="cl-copy-btn" onclick="deleteSavedResume(${r.id})" style="color:var(--warn);border-color:rgba(248,113,113,.3);">Delete</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function selectBulletStyle(btn, section) {
@@ -6802,6 +6920,12 @@ async function importJMJob() {
       'You are a job posting extractor. Return only the relevant job description content, cleanly formatted.'
     );
     document.getElementById('jmJobText').value = extracted;
+    // Extract salary info
+    try {
+      const salaryRaw = await callAI('Extract ONLY the salary or compensation from this job posting. If found, return a single short line like "💰 $85,000–$110,000/yr" or "💰 $45–$65/hr". If no salary is mentioned, return exactly: NONE.\n\n' + extracted, 'Salary extractor. Return one line or NONE.');
+      const badge = document.getElementById('jmSalaryBadge');
+      if (badge && salaryRaw && !salaryRaw.includes('NONE')) { badge.textContent = salaryRaw.trim(); badge.style.display = 'block'; }
+    } catch(e) {}
     showToast('Job posting imported!');
   } catch(e) {
     console.error('Import error:', e);
@@ -6834,6 +6958,12 @@ async function importAppPackJob() {
       const match = extracted.match(/^(.+?)\n/);
       if (match && !roleEl.value) roleEl.value = match[1].trim().replace(/^(job title|role|position):?\s*/i, '');
     }
+    // Extract salary info
+    try {
+      const salaryRaw = await callAI('Extract ONLY the salary or compensation from this job posting. If found, return a single short line like "💰 $85,000–$110,000/yr" or "💰 $45–$65/hr". If no salary is mentioned, return exactly: NONE.\n\n' + extracted, 'Salary extractor. Return one line or NONE.');
+      const badge = document.getElementById('apSalaryBadge');
+      if (badge && salaryRaw && !salaryRaw.includes('NONE')) { badge.textContent = salaryRaw.trim(); badge.style.display = 'block'; }
+    } catch(e) {}
     showToast('Job posting imported!');
   } catch(e) {
     console.error('Import error:', e);
