@@ -950,7 +950,10 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 
 <!-- NAV -->
 <nav>
-  <div class="logo" id="siteLogo" style="cursor:pointer;">Howdy<span> Resume</span></div>
+  <div class="logo" id="siteLogo" style="cursor:pointer;display:flex;align-items:center;gap:10px;" onclick="showPage('home')">
+    <img src="logo.png" style="height:38px;width:38px;object-fit:contain;flex-shrink:0;" alt="Howdy Resume">
+    Howdy<span> Resume</span>
+  </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('home')">Home</button>
     <button class="nav-tab" onclick="showPage('tool')">✦ Proposals <span class="tab-badge" id="usageBadge"></span></button>
@@ -999,6 +1002,7 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 <!-- ══════════ HOME PAGE ══════════ -->
 <div class="page active" id="page-home">
   <section class="hero">
+    <img src="logo.png" style="width:80px;height:80px;object-fit:contain;margin-bottom:16px;filter:drop-shadow(0 4px 20px rgba(26,181,181,0.3));" alt="Howdy Resume">
     <div class="hero-badge">AI Resume + Job Search Platform</div>
     <h1>Build. Optimize. <em>Get interviews.</em></h1>
     <p class="hero-sub">Upload your resume, get an ATS-style score, fix weak spots with AI, and export a polished PDF or Word resume in the template you choose.</p>
@@ -1288,7 +1292,10 @@ function handleAgencyCheckout() {
   </div>
 
   <footer>
-    <div class="footer-logo">Resume<span id="footerHowdy" style="cursor:pointer;" onclick="openModal('admin')"> Howdy</span></div>
+    <div class="footer-logo" style="display:flex;align-items:center;gap:8px;">
+      <img src="logo.png" style="height:28px;width:28px;object-fit:contain;" alt="Howdy Resume">
+      <span>Howdy<span id="footerHowdy" style="cursor:pointer;color:var(--accent2);" onclick="openModal('admin')"> Resume</span></span>
+    </div>
     <div class="footer-links">
       <button class="footer-link" onclick="showPage('tool')">Generator</button>
       <button class="footer-link" onclick="showPage('jobs')">Jobs</button>
