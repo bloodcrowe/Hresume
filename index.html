@@ -2197,6 +2197,10 @@ function handleAgencyCheckout() {
                 <button class="rb-download-btn" id="jmOptDownloadBtn" onclick="exportStyledResumePDF(jmOptimizedText,'Job-Optimized-Resume.pdf')">⬇ Download PDF</button>
               </div>
               <textarea class="rb-input" id="jmOptText" style="width:100%;min-height:340px;font-size:12px;font-family:monospace;border-radius:10px;padding:12px;box-sizing:border-box;resize:vertical;" readonly></textarea>
+              <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+                <select class="rb-input" id="jmOptStyleSelect" style="flex:1;"></select>
+                <button onclick="saveJobOptimizedResume()" style="white-space:nowrap;padding:8px 14px;border-radius:8px;border:1px solid rgba(96,165,250,.35);background:rgba(96,165,250,.1);color:#60a5fa;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">💾 Save to My Resumes</button>
+              </div>
             </div>
           </div>
         </div>
@@ -7459,11 +7463,32 @@ async function runJobOptimize() {
     var tEl2 = document.getElementById('jmOptText');
     if (tEl2) tEl2.value = opt2;
     var oEl2 = document.getElementById('jmOptOutput');
-    if (oEl2) { oEl2.style.display = 'block'; setTimeout(function(){ oEl2.scrollIntoView({behavior:'smooth'}); }, 100); }
+    if (oEl2) {
+      oEl2.style.display = 'block';
+      var styleEl = document.getElementById('jmOptStyleSelect');
+      if (styleEl) styleEl.innerHTML = TEMPLATE_STYLES.map(function(t){ return '<option value="'+t.key+'"'+(rbStyle===t.key?' selected':'')+'>'+t.label+'</option>'; }).join('');
+      setTimeout(function(){ oEl2.scrollIntoView({behavior:'smooth'}); }, 100);
+    }
     showToast('Optimized!');
   } catch(e2) { showToast('Failed. Try again.'); }
   optBtn.disabled = false;
   optBtn.innerHTML = '\u2728 Optimize Resume for This Job';
+}
+
+async function saveJobOptimizedResume() {
+  const text = jmOptimizedText || document.getElementById('jmOptText')?.value || '';
+  if (!text.trim()) { showToast('No job-optimized resume to save.'); return; }
+  const data = await parseOptimizedResumeText(text);
+  if (!data || !data.name) { showToast('Could not find a name in the resume.'); return; }
+  _saveOptData = data;
+  const nameEl = document.getElementById('saveOptName');
+  const styleEl = document.getElementById('saveOptStyle');
+  const chosenStyle = document.getElementById('jmOptStyleSelect')?.value || rbStyle;
+  if (nameEl) nameEl.value = (data.name || '') + ' - Job Match Resume';
+  if (styleEl) {
+    styleEl.innerHTML = TEMPLATE_STYLES.map(function(t){ return '<option value="'+t.key+'"'+(chosenStyle===t.key?' selected':'')+'>'+t.label+'</option>'; }).join('');
+  }
+  openModal('saveOpt');
 }
 
 function switchInterviewTab(tab, btn) {
