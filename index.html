@@ -1717,6 +1717,21 @@ function handleAgencyCheckout() {
     </div>
   </div>
 
+  <!-- SAVE OPTIMIZED RESUME -->
+  <div class="modal" id="saveOptModal" style="display:none;max-width:400px;">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">💾 Save to My Resumes</div>
+    <div class="modal-field">
+      <label class="modal-label">Resume Name</label>
+      <input type="text" class="rb-input" id="saveOptName" placeholder="e.g. Jane Smith - Optimized Resume" style="width:100%;box-sizing:border-box;">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Template Style</label>
+      <select class="rb-input" id="saveOptStyle" style="width:100%;box-sizing:border-box;margin-top:4px;"></select>
+    </div>
+    <button class="modal-btn" onclick="confirmSaveOptimizedResume()">Save Resume →</button>
+  </div>
+
   <!-- FORGOT PASSWORD -->
   <div class="modal" id="forgotModal" style="display:none;">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -1875,6 +1890,14 @@ function handleAgencyCheckout() {
 
     <!-- CENTER: Form -->
     <div class="rb-form-panel">
+
+      <!-- Load from My Resumes -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+        <select class="rb-input" id="buildLoadSelect" style="flex:1;">
+          <option value="">Load from My Resumes...</option>
+        </select>
+        <button class="rb-download-btn" onclick="loadSavedResumeIntoBuild()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+      </div>
 
       <!-- Personal Info -->
       <div>
@@ -3702,7 +3725,7 @@ function handleUpgrade(){
 // ══ MODALS ══
 function openModal(type){
   document.getElementById('modalOverlay').classList.add('open');
-  ['signupModal','loginModal','upgradeModal','addJobModal','jobDetailModal','adminModal','privacyModal','termsModal','forgotModal'].forEach(id=>{
+  ['signupModal','loginModal','upgradeModal','addJobModal','jobDetailModal','adminModal','privacyModal','termsModal','forgotModal','saveOptModal'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display='none';
   });
   const target=document.getElementById(type+'Modal');
@@ -5442,7 +5465,7 @@ function switchResumeTab(tab, btn) {
     const jmText = document.getElementById('jmResumeText');
     if (optText && jmText && !jmText.value) jmText.value = optText;
   }
-  if (tab === 'build') renderPreview();
+  if (tab === 'build') { renderPreview(); renderBuildLoadOptions(); }
   if (tab === 'optimize') { renderOptimizerSavedResumeOptions(); checkOptimizerPlaceholders(); }
   if (tab === 'myresumes') renderSavedResumes();
   if (tab === 'references') renderRefList();
@@ -5837,19 +5860,40 @@ async function parseOptimizedResumeText(text) {
   }
 }
 
+let _saveOptData = null;
+
 async function saveOptimizedResume() {
   const text = (improvedResumeText || document.getElementById('optResumeText')?.value || '').trim();
   if (!text) { showToast('No optimized resume text to save.'); return; }
   if (checkOptimizerPlaceholders(text).length) { showToast('Fill placeholder details before saving.'); return; }
   const data = await parseOptimizedResumeText(text);
   if (!data || !data.name) { showToast('Could not find a name in the optimized resume.'); return; }
-  const name = prompt('Name this optimized resume version:', data.name + ' - Optimized Resume') || (data.name + ' - Optimized Resume');
+  _saveOptData = data;
+  // Populate modal
+  const nameEl = document.getElementById('saveOptName');
+  const styleEl = document.getElementById('saveOptStyle');
+  if (nameEl) nameEl.value = (data.name || '') + ' - Optimized Resume';
+  if (styleEl) {
+    styleEl.innerHTML = TEMPLATE_STYLES.map(t => '<option value="' + t.key + '"' + (rbStyle === t.key ? ' selected' : '') + '>' + t.label + '</option>').join('');
+  }
+  openModal('saveOpt');
+}
+
+function confirmSaveOptimizedResume() {
+  if (!_saveOptData) return;
+  const nameEl = document.getElementById('saveOptName');
+  const styleEl = document.getElementById('saveOptStyle');
+  const name = (nameEl?.value || '').trim() || (_saveOptData.name + ' - Optimized Resume');
+  const chosenStyle = styleEl?.value || rbStyle;
   const saved = getSavedResumes();
-  saved.unshift({ id: Date.now(), name, style: rbStyle, color: rbAccentColor, data, score: optBaselineScore || lastResumeScore, savedAt: new Date().toLocaleDateString() });
+  saved.unshift({ id: Date.now(), name, style: chosenStyle, color: rbAccentColor, data: _saveOptData, score: optBaselineScore || lastResumeScore, savedAt: new Date().toLocaleDateString() });
   setSavedResumes(saved.slice(0, 20));
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
-  showToast('Optimized resume saved: ' + name);
+  renderBuildLoadOptions();
+  closeModal();
+  _saveOptData = null;
+  showToast('Saved: ' + name);
 }
 
 // ══ ACCENT COLOR ══
@@ -6414,6 +6458,22 @@ function downloadReferencesPDF() {
 function getSavedResumes() { return JSON.parse(localStorage.getItem('hr_saved_resumes') || '[]'); }
 function setSavedResumes(arr) { localStorage.setItem('hr_saved_resumes', JSON.stringify(arr)); }
 
+function renderBuildLoadOptions() {
+  const select = document.getElementById('buildLoadSelect');
+  if (!select) return;
+  const saved = getSavedResumes();
+  select.innerHTML = '<option value="">Load from My Resumes...</option>' + saved.map(r => {
+    const score = r.score ? ' — Score ' + r.score.score + '/100' : '';
+    return '<option value="' + r.id + '">' + escapeResumeHTML(r.name || 'Saved Resume') + score + '</option>';
+  }).join('');
+}
+
+function loadSavedResumeIntoBuild() {
+  const select = document.getElementById('buildLoadSelect');
+  if (!select || !select.value) { showToast('Choose a saved resume first.'); return; }
+  loadSavedResume(Number(select.value));
+}
+
 function saveCurrentResume() {
   const data = getResumeData();
   if (!data.name) { showToast('Add your name before saving.'); return; }
@@ -6423,6 +6483,7 @@ function saveCurrentResume() {
   setSavedResumes(saved.slice(0, 20)); // cap at 20
   renderSavedResumes();
   renderOptimizerSavedResumeOptions();
+  renderBuildLoadOptions();
   showToast('Resume saved: ' + name);
 }
 
@@ -6497,6 +6558,8 @@ function deleteSavedResume(id) {
   if (!confirm('Delete this saved resume?')) return;
   setSavedResumes(getSavedResumes().filter(s => s.id !== id));
   renderSavedResumes();
+  renderOptimizerSavedResumeOptions();
+  renderBuildLoadOptions();
   showToast('Deleted.');
 }
 
