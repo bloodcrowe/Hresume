@@ -5879,7 +5879,7 @@ async function runOptimizer() {
     const baselineNote = optBaselineScore
       ? ' Previous builder score for this exact resume: ' + optBaselineScore.score + '/100' + (optBaselineScore.grade ? ' (' + optBaselineScore.grade + ')' : '') + '. Calibrate against that same rubric; do not lower the score just because you found improvement opportunities unless there is a clear, material weakness.'
       : '';
-    const systemMsg = 'You are an expert resume coach and ATS specialist. Today is ' + todayForAI + '. Analyze the resume and return JSON ONLY (no markdown, no extra text). Return this exact structure: {"score":<0-100>,"scoreLabel":"<Poor|Fair|Good|Strong|Excellent>","issues":[{"type":"<critical|warning|tip>","title":"<short title>","why":"<1-2 sentences>","before":"<exact weak phrase or N/A>","after":"<improved version or advice>"}],"improvedResume":"<full rewritten resume; never fabricate, only improve what exists>"}. ' + RESUME_SCORE_RUBRIC + baselineNote + ' Rules: never invent jobs/degrees/employers, dates, certifications, education, metrics, or tools. Date rules: do not flag any date before today as future. A current role with a start date before today and end date Present is valid; for example, Jul 2025 - Present is valid on June 16, 2026. If a valid date includes a day, such as July 14 2025, keep the date but normalize it to resume month/year format such as Jul 2025. Only ask the user to verify a date when it is after today or internally inconsistent. Rewrite rules: every after value must be final usable resume text. Do not use awaiting information, TBD, verify, add specific, if available, or unclear placeholders in after. Keep wording human, credible, and ATS-safe. Do not over-optimize, exaggerate scope, or push bullets toward quantification. Use plain professional language that another AI detector or recruiter would not read as inflated. Never suggest a percentage, revenue figure, or team size unless the original resume already contained one or the original text clearly and directly implies a real measurable number (for example, "managed a team" does NOT imply a team size worth guessing). For resumes that score 70 or above, focus exclusively on wording, clarity, and action verb improvements — do not inject metrics into strong resumes. Across the entire resume, limit metric-placeholder suggestions to a maximum of 2; if the resume already has good quantification, use 0. If a suggestion truly needs a missing number, use simple placeholders such as X%, Y days, Z units, or [team size] — never fabricate a specific number. Preserve strong sections, quantified achievements, job titles, employers, dates, skills, and concrete accomplishments. Do not rewrite a strong resume into a generic one. Only improve weak phrases, missing action verbs, formatting consistency, date format consistency, and clarity. If a section is already strong, leave it substantially intact. The improvedResume must read like the same person wrote it, just cleaner — not like an AI tried to inflate every bullet point. The improved resume should be equal or better than the original by the same rubric; never remove useful specifics. Return 5-8 issues, prioritizing the highest-value fixes. Formatting rule: ' + bulletInstr;
+    const systemMsg = 'You are an expert resume coach and ATS specialist. Today is ' + todayForAI + '. Analyze the resume and return JSON ONLY (no markdown, no extra text). Return this exact structure: {"score":<0-100>,"scoreLabel":"<Poor|Fair|Good|Strong|Excellent>","issues":[{"type":"<critical|warning|tip>","title":"<short title>","why":"<1-2 sentences>","before":"<exact weak phrase or N/A>","after":"<improved version or advice>"}],"improvedResume":"<full rewritten resume; never fabricate, only improve what exists>"}. ' + RESUME_SCORE_RUBRIC + baselineNote + ' Rules: never invent jobs/degrees/employers, dates, certifications, education, metrics, or tools. Date rules: do not flag any date before today as future. A current role with a start date before today and end date Present is valid; for example, Jul 2025 - Present is valid on June 16, 2026. If a valid date includes a day, such as July 14 2025, keep the date but normalize it to resume month/year format such as Jul 2025. Only ask the user to verify a date when it is after today or internally inconsistent. Rewrite rules: every after value must be final usable resume text. Do not use awaiting information, TBD, verify, add specific, if available, or unclear placeholders in after. Keep wording human, credible, and ATS-safe. Prefer separate clear bullets over long combined bullets; each bullet should cover one main duty, tool, process, or result and stay easy to scan. Do not over-optimize, exaggerate scope, or push bullets toward quantification. Use plain professional language that another AI detector or recruiter would not read as inflated. Never suggest a percentage, revenue figure, or team size unless the original resume already contained one or the original text clearly and directly implies a real measurable number (for example, "managed a team" does NOT imply a team size worth guessing). For resumes that score 70 or above, focus exclusively on wording, clarity, and action verb improvements — do not inject metrics into strong resumes. Across the entire resume, limit metric-placeholder suggestions to a maximum of 2; if the resume already has good quantification, use 0. If a suggestion truly needs a missing number, use simple placeholders such as X%, Y days, Z units, or [team size] — never fabricate a specific number. Preserve strong sections, quantified achievements, job titles, employers, dates, skills, and concrete accomplishments. Do not rewrite a strong resume into a generic one. Only improve weak phrases, missing action verbs, formatting consistency, date format consistency, and clarity. If a section is already strong, leave it substantially intact. The improvedResume must read like the same person wrote it, just cleaner — not like an AI tried to inflate every bullet point. The improved resume should be equal or better than the original by the same rubric; never remove useful specifics. Return 5-8 issues, prioritizing the highest-value fixes. Formatting rule: ' + bulletInstr;
     const raw = await callAI('Analyze and optimize this resume:\n\n' + resumeText, systemMsg);
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Invalid response');
@@ -7818,10 +7818,10 @@ function generateFromJobPost(expId) {
   var jobPost = jobPostTA ? jobPostTA.value.trim() : '';
   if (!jobPost) { showToast('Please paste a job description first.'); return; }
   btn.textContent = 'Generating...'; btn.disabled = true;
-  var sys = 'You are an expert resume writer. Given a job description, write 4-6 strong resume bullet points that someone in this role could use on their resume. Use powerful action verbs, professional past-tense language. Each bullet reflects real on-the-job duties. Never fabricate specific numbers. Return ONLY the bullet points, one per line, each starting with a bullet character. No intro text.';
+  var sys = 'You are an expert resume writer. Given a job description, write 5-7 clean resume bullet points that someone in this role could use on their resume. Style: direct, believable, recruiter-friendly, and ATS-aware. Prefer separate clear bullets over long combined bullets. Each bullet should cover one main duty, tool, process, or result. Use strong but natural action verbs such as Coordinated, Documented, Supported, Maintained, Reviewed, Communicated, Tracked, Prepared, Assisted, Improved, or Trained. Include relevant keywords from the job, but do not sound inflated or robotic. Keep each bullet 12-22 words when possible. Never fabricate specific numbers, percentages, revenue, team sizes, certifications, employers, or tools not supported by the job text. Return ONLY the bullet points, one per line, each starting with •. No intro text.';
   var msg = (role ? 'Role: ' + role + '\n' : '') + (company ? 'Company: ' + company + '\n' : '') + '\nJob description to convert into resume bullets:\n' + jobPost;
   callAI(msg, sys).then(function(result) {
-    if (descTA) { descTA.value = result.trim(); renderPreview(); }
+    if (descTA) { descTA.value = cleanAIBulletOutput(result); renderPreview(); }
     var panel = document.getElementById('jobpost-panel-' + expId);
     if (panel) panel.style.display = 'none';
     showToast('Bullets generated!');
@@ -7830,6 +7830,24 @@ function generateFromJobPost(expId) {
     showToast('Error generating bullets. Try again.');
     btn.textContent = 'Generate My Bullets'; btn.disabled = false;
   });
+}
+
+function cleanAIBulletOutput(text) {
+  const lines = String(text || '')
+    .split(/\r?\n+/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => line
+      .replace(/^["'`]+|["'`]+$/g, '')
+      .replace(/^(?:[-*?•–—]|\d+[.)])\s*/g, '')
+      .trim())
+    .filter(Boolean);
+  const unique = [];
+  lines.forEach(line => {
+    const key = line.toLowerCase();
+    if (!unique.some(existing => existing.toLowerCase() === key)) unique.push(line);
+  });
+  return unique.slice(0, 7).map(line => '• ' + line.replace(/[.;]\s*$/, '.')).join('\n');
 }
 
 async function aiBulletWriter(expId) {
@@ -7841,10 +7859,10 @@ async function aiBulletWriter(expId) {
   if (!role && !company) { showToast('Add a role or company first.'); return; }
   btn.textContent = '...'; btn.disabled = true;
   try {
-    const sys = 'You are an expert resume writer. Write 2-3 strong resume bullet points using action verbs and measurable outcomes. Never fabricate numbers. Return ONLY the bullet points, each starting with •.';
-    const msg = 'Role: ' + role + '\nCompany: ' + company + (existing ? '\nExisting notes: ' + existing : '') + '\n\nWrite 2-3 powerful bullet points.';
+    const sys = 'You are an expert resume writer. Write 5-7 clean resume bullet points for this job entry. Style: direct, believable, recruiter-friendly, and ATS-aware. Prefer more separate clear bullets over fewer dense bullets. Each bullet should cover one main duty, tool, process, or result. Preserve the real meaning of any existing notes. Use strong but natural action verbs such as Coordinated, Documented, Supported, Maintained, Reviewed, Communicated, Tracked, Prepared, Assisted, Improved, or Trained. Keep bullets detailed enough to be useful but easy to scan, ideally 12-22 words each. Do not combine unrelated responsibilities into one long sentence. Never fabricate specific numbers, percentages, revenue, team sizes, certifications, employers, or tools. Return ONLY bullet points, one per line, each starting with •. No intro text.';
+    const msg = 'Role: ' + role + '\nCompany: ' + company + (existing ? '\nExisting notes or current bullets:\n' + existing : '') + '\n\nRewrite into 5-7 clean, detailed, human-readable resume bullets.';
     const result = await callAI(msg, sys);
-    ta.value = result.trim();
+    ta.value = cleanAIBulletOutput(result);
     renderPreview();
     showToast('Bullets generated!');
   } catch(e) { console.error('aiBulletWriter error:', e); showToast('AI error: ' + (e.message || 'Unknown error. Check console.')); }
