@@ -4971,7 +4971,7 @@ function buildResumeHTML(data, style) {
     +'<div class="r-entry-top"><span class="r-entry-company">'+e.school+'</span><span class="r-entry-date">'+e.start+(e.end?' – '+e.end:'')+'</span></div>'
     +(e.degree?'<div class="r-entry-role">'+e.degree+'</div>':'')
     +'</div>').join('');
-  const mkSkills = () => data.skills.map(s=>'<span class="r-skill">'+s+'</span>').join('');
+  const mkSkills = () => data.skills.map(s=>'<span class="r-skill">'+escapeResumeHTML(s)+'</span>').join('');
   const sec = (title,body) => body?'<div class="r-section"><div class="r-section-title">'+title+'</div>'+body+'</div>':'';
 
   if(style==='sidebar') {
@@ -5611,27 +5611,47 @@ function renderTemplateGallery() {
       (data.experiences||[]).some(function(e){return e.company||e.role;}) || (data.skills||[]).length;
     const pd = hasContent ? data : DEMO_RESUME;
     const css = getResumePageCSS();
-    gallery.innerHTML = '';
-    TEMPLATE_STYLES.forEach(function(t) {
-      try {
-        var card = document.createElement('div');
-        card.className = 'rb-tpl-card' + (rbStyle===t.key ? ' selected' : '');
-        card.onclick = function(){ selectStyle(t.key); };
-        var thumb = document.createElement('div');
-        thumb.className = 'rb-tpl-thumb';
-        var frame = document.createElement('iframe');
-        frame.style.cssText = 'width:545px;height:700px;border:none;transform:scale(0.35);transform-origin:top left;pointer-events:none;position:absolute;top:0;left:0;'; thumb.style.position='relative'; thumb.style.overflow='hidden';
-        frame.srcdoc = buildFrameDoc(buildResumeHTML(pd, t.key), css);
-        thumb.appendChild(frame);
-        var label = document.createElement('div');
-        label.className = 'rb-tpl-label';
-        label.textContent = t.icon + ' ' + t.label;
-        card.appendChild(thumb);
-        card.appendChild(label);
-        gallery.appendChild(card);
-      } catch(err) { console.error('thumb error', t.key, err); }
-    });
+    const existingCards = gallery.querySelectorAll('.rb-tpl-card');
+    if (existingCards.length === TEMPLATE_STYLES.length) {
+      // Update in-place — avoids blank flash
+      TEMPLATE_STYLES.forEach(function(t, i) {
+        try {
+          var card = existingCards[i];
+          card.className = 'rb-tpl-card' + (rbStyle===t.key ? ' selected' : '');
+          var frame = card.querySelector('iframe');
+          if (frame) frame.srcdoc = buildFrameDoc(buildResumeHTML(pd, t.key), css);
+        } catch(err) { console.error('thumb update error', t.key, err); }
+      });
+    } else {
+      // Full rebuild (first load or template list changed)
+      gallery.innerHTML = '';
+      TEMPLATE_STYLES.forEach(function(t) {
+        try {
+          var card = document.createElement('div');
+          card.className = 'rb-tpl-card' + (rbStyle===t.key ? ' selected' : '');
+          card.onclick = function(){ selectStyle(t.key); };
+          var thumb = document.createElement('div');
+          thumb.className = 'rb-tpl-thumb';
+          var frame = document.createElement('iframe');
+          frame.style.cssText = 'width:545px;height:700px;border:none;transform:scale(0.35);transform-origin:top left;pointer-events:none;position:absolute;top:0;left:0;'; thumb.style.position='relative'; thumb.style.overflow='hidden';
+          frame.srcdoc = buildFrameDoc(buildResumeHTML(pd, t.key), css);
+          thumb.appendChild(frame);
+          var label = document.createElement('div');
+          label.className = 'rb-tpl-label';
+          label.textContent = t.icon + ' ' + t.label;
+          card.appendChild(thumb);
+          card.appendChild(label);
+          gallery.appendChild(card);
+        } catch(err) { console.error('thumb error', t.key, err); }
+      });
+    }
   } catch(e) { console.error('renderTemplateGallery error:', e); }
+}
+
+var _galleryDebounceTimer = null;
+function scheduleGalleryRender() {
+  if (_galleryDebounceTimer) clearTimeout(_galleryDebounceTimer);
+  _galleryDebounceTimer = setTimeout(function() { _galleryDebounceTimer = null; renderTemplateGallery(); }, 400);
 }
 
 function renderPreview() {
@@ -5667,7 +5687,7 @@ function renderPreview() {
     } else {
       if (overlay) overlay.remove();
     }
-    renderTemplateGallery();
+    scheduleGalleryRender();
   } catch(e) { console.error('renderPreview error:', e); }
 }
 
