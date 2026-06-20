@@ -930,6 +930,14 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 .saved-resume-name{font-size:14px;font-weight:600;color:var(--text);}
 .saved-resume-meta{font-size:11px;color:var(--muted);margin-top:2px;}
 .saved-resume-actions{display:flex;gap:6px;flex-shrink:0;}
+.rb-skill-suggestions{display:none;margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);}
+.rb-skill-suggestions.visible{display:block;}
+.rb-skill-suggestions-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.rb-skill-suggestions-title{font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;}
+.rb-skill-chip-row{display:flex;flex-wrap:wrap;gap:6px;}
+.rb-skill-chip{border:1px solid rgba(124,106,255,.32);background:rgba(124,106,255,.08);color:var(--text);font-family:var(--font-body);font-size:11px;font-weight:600;border-radius:20px;padding:5px 10px;cursor:pointer;transition:all .15s;}
+.rb-skill-chip:hover{border-color:var(--accent);color:var(--accent2);transform:translateY(-1px);}
+.rb-skill-chip.added{opacity:.45;cursor:default;text-decoration:line-through;}
 /* Reference builder */
 .ref-entry{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px;position:relative;}
 .ref-remove{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;}
@@ -2051,9 +2059,13 @@ function handleAgencyCheckout() {
         <div class="rb-field">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
             <label class="rb-label" style="margin:0;">Comma-separated (e.g. React, Figma, SEO)</label>
-            <button onclick="aiSkillsWriter()" id="rb-skills-ai-btn" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(124,106,255,.4);background:rgba(124,106,255,.08);color:var(--accent2);cursor:pointer;font-family:var(--font-body);">✦ AI Skills</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+              <button onclick="suggestSkillsFromJobs()" id="rb-skills-suggest-btn" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:var(--success);cursor:pointer;font-family:var(--font-body);">Suggest from Jobs</button>
+              <button onclick="aiSkillsWriter()" id="rb-skills-ai-btn" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(124,106,255,.4);background:rgba(124,106,255,.08);color:var(--accent2);cursor:pointer;font-family:var(--font-body);">✦ AI Skills</button>
+            </div>
           </div>
           <input class="rb-input" id="rb-skills" placeholder="Figma, React, Copywriting, SEO..." oninput="renderPreview()">
+          <div class="rb-skill-suggestions" id="rb-skill-suggestions"></div>
         </div>
       </div>
 
@@ -7647,6 +7659,122 @@ async function aiSkillsWriter() {
   } finally {
     if (btn) { btn.textContent = '✦ AI Skills'; btn.disabled = false; }
   }
+}
+
+const EXPERIENCE_SKILL_RULES = [
+  {terms:['quality','inspection','inspector','technician','audit','capa','corrective','preventive','iso','sop','pfmea','gauge','calibration','manufacturing','defect','compliance'], skills:['Quality Management Systems (QMS)','Quality Control','Inspection Documentation','Corrective and Preventive Actions (CAPA)','Standard Operating Procedures (SOPs)','Root Cause Analysis','Compliance Documentation','Process Improvement']},
+  {terms:['logistics','inventory','returns','shipping','warehouse','supply chain','vendor','stock','dock','reverse logistics','fulfillment'], skills:['Reverse Logistics','Inventory Management','Vendor Coordination','Supply Chain Operations','Returns Management','Process Documentation','Cross-Functional Coordination']},
+  {terms:['customer','client','support','service','call center','crm','relationship','complaint','ticket','resolution'], skills:['Customer Service','Customer Relationship Management (CRM)','Issue Resolution','Communication','Documentation','Needs Assessment']},
+  {terms:['project','program','scrum','agile','stakeholder','timeline','budget','risk','jira','asana','coordination'], skills:['Project Management','Stakeholder Communication','Agile Methodology','Risk Management','Timeline Management','Cross-Functional Leadership']},
+  {terms:['manager','supervisor','lead','trained','coached','team','staff','schedule','performance','hiring'], skills:['Team Leadership','Training and Development','Scheduling','Performance Management','Staff Coordination','Operational Oversight']},
+  {terms:['sales','account','pipeline','quota','crm','lead','prospect','negotiation','demo','revenue'], skills:['Salesforce','Pipeline Management','Lead Generation','Account Management','Negotiation','Sales Presentations','CRM Management']},
+  {terms:['marketing','seo','campaign','analytics','email','social','content','ads','brand','copywriting'], skills:['Digital Marketing','SEO','Campaign Management','Content Strategy','Email Marketing','Analytics','Copywriting']},
+  {terms:['developer','software','javascript','react','node','api','python','sql','database','frontend','backend','full-stack','github'], skills:['JavaScript','React','Node.js','API Integration','SQL','Git','Software Development','Problem Solving']},
+  {terms:['design','designer','ux','ui','figma','prototype','wireframe','brand','adobe','photoshop','illustrator'], skills:['Figma','User Experience (UX)','User Interface (UI)','Wireframing','Prototyping','Design Systems','Adobe Creative Suite']},
+  {terms:['data','analyst','analysis','dashboard','reporting','excel','tableau','power bi','sql','metrics','kpi'], skills:['Data Analysis','Reporting','Microsoft Excel','Dashboard Development','KPI Tracking','SQL','Process Analysis']},
+  {terms:['admin','assistant','calendar','email','scheduling','data entry','office','records','clerical'], skills:['Administrative Support','Calendar Management','Email Management','Data Entry','Records Management','Organization']},
+  {terms:['healthcare','patient','clinical','medical','nursing','care','chart','hipaa'], skills:['Patient Care','Clinical Documentation','HIPAA Compliance','Medical Records','Care Coordination']},
+  {terms:['video','editor','premiere','after effects','davinci','motion','color grading','youtube'], skills:['Video Editing','Adobe Premiere Pro','After Effects','DaVinci Resolve','Motion Graphics','Storytelling']}
+];
+
+function normalizeSkillName(skill) {
+  return String(skill || '').replace(/\s+/g, ' ').trim();
+}
+
+function buildExperienceSkillSuggestions(data) {
+  const experienceText = (data.experiences || [])
+    .filter(e => e.company || e.role || e.desc)
+    .map(e => [e.role, e.company, e.desc].filter(Boolean).join(' '))
+    .join(' ')
+    .toLowerCase();
+  const context = [data.title, data.summary, experienceText].filter(Boolean).join(' ').toLowerCase();
+  if (!context.trim()) return [];
+
+  const scored = new Map();
+  EXPERIENCE_SKILL_RULES.forEach(rule => {
+    const matches = rule.terms.reduce((count, term) => count + (context.includes(term) ? 1 : 0), 0);
+    if (!matches) return;
+    rule.skills.forEach((skill, idx) => {
+      const key = skill.toLowerCase();
+      const current = scored.get(key);
+      const score = matches * 10 - idx;
+      if (!current || score > current.score) scored.set(key, {skill, score});
+    });
+  });
+
+  const explicitSkillHints = [
+    'Excel','Google Sheets','Microsoft Office','PowerPoint','Word','Tableau','Power BI','Salesforce','HubSpot','JIRA','Asana','Notion','Slack','QuickBooks',
+    'JavaScript','TypeScript','React','Python','SQL','AWS','Docker','Git','Figma','Photoshop','Illustrator','Premiere Pro','After Effects'
+  ];
+  explicitSkillHints.forEach(skill => {
+    if (context.includes(skill.toLowerCase())) {
+      const key = skill.toLowerCase();
+      if (!scored.has(key)) scored.set(key, {skill, score: 95});
+    }
+  });
+
+  return Array.from(scored.values())
+    .sort((a, b) => b.score - a.score || a.skill.localeCompare(b.skill))
+    .map(item => item.skill)
+    .slice(0, 18);
+}
+
+function appendSkillToBuilder(skill, btn) {
+  const input = document.getElementById('rb-skills');
+  if (!input) return;
+  const clean = normalizeSkillName(skill);
+  if (!clean) return;
+  const existing = getResumeSkillLines((input.value || '').split(','));
+  if (!existing.some(s => s.toLowerCase() === clean.toLowerCase())) {
+    existing.push(clean);
+    input.value = existing.join(', ');
+    clearResumeScore();
+    renderPreview();
+    showToast('Skill added');
+  }
+  if (btn) {
+    btn.classList.add('added');
+    btn.disabled = true;
+  }
+}
+
+function addAllSuggestedSkills() {
+  const panel = document.getElementById('rb-skill-suggestions');
+  const chips = panel ? Array.from(panel.querySelectorAll('.rb-skill-chip:not(.added)')) : [];
+  chips.forEach(chip => appendSkillToBuilder(chip.dataset.skill || chip.textContent, chip));
+  if (chips.length) showToast('Suggested skills added');
+}
+
+function suggestSkillsFromJobs() {
+  const data = getResumeData();
+  const panel = document.getElementById('rb-skill-suggestions');
+  const hasExperience = (data.experiences || []).some(e => e.company || e.role || e.desc);
+  if (!hasExperience && !data.title && !data.summary) {
+    showToast('Add job history first, then suggest skills.');
+    return;
+  }
+
+  const existing = getResumeSkillLines(data.skills).map(s => s.toLowerCase());
+  const suggestions = buildExperienceSkillSuggestions(data).filter(skill => !existing.includes(skill.toLowerCase()));
+  if (!panel) return;
+  if (!suggestions.length) {
+    panel.classList.add('visible');
+    panel.innerHTML = '<div class="rb-skill-suggestions-title">No new skills found</div><div style="font-size:12px;color:var(--muted);margin-top:6px;">Add more detail to your work experience bullets, then try again.</div>';
+    showToast('No new skills found.');
+    return;
+  }
+
+  panel.classList.add('visible');
+  panel.innerHTML = `
+    <div class="rb-skill-suggestions-head">
+      <div class="rb-skill-suggestions-title">Suggested from work history</div>
+      <button type="button" onclick="addAllSuggestedSkills()" style="font-size:11px;font-weight:700;border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.08);color:var(--success);border-radius:8px;padding:4px 9px;cursor:pointer;">Add all</button>
+    </div>
+    <div class="rb-skill-chip-row">
+      ${suggestions.map(skill => `<button type="button" class="rb-skill-chip" data-skill="${escapeResumeHTML(skill)}" onclick="appendSkillToBuilder(this.dataset.skill,this)">${escapeResumeHTML(skill)}</button>`).join('')}
+    </div>
+  `;
+  showToast('Suggested skills ready.');
 }
 
 // ── JOB POST BULLET GENERATOR ──
