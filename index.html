@@ -94,8 +94,12 @@ h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent2),#c4b5fd
 .hero-btns{display:flex;gap:12px;justify-content:center;margin-bottom:50px;flex-wrap:wrap;}
 .btn-primary{font-size:15px;font-weight:700;padding:14px 32px;border-radius:12px;background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:var(--font-display);transition:all 0.2s;}
 .btn-primary:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 28px var(--accent-glow);}
+.btn-primary:active{transform:translateY(0) scale(0.97);box-shadow:0 2px 8px var(--accent-glow);opacity:0.9;transition:all 0.08s;}
+.btn-clicked{animation:btnFlash 0.35s ease;}
+@keyframes btnFlash{0%{box-shadow:0 0 0 0 var(--accent-glow);}50%{box-shadow:0 0 0 8px rgba(124,106,255,0);}100%{box-shadow:0 0 0 0 rgba(124,106,255,0);}}
 .btn-secondary{font-size:15px;font-weight:600;padding:14px 28px;border-radius:12px;background:transparent;border:1px solid var(--border2);color:var(--text);cursor:pointer;font-family:var(--font-display);transition:all 0.2s;}
 .btn-secondary:hover{border-color:var(--accent);background:rgba(124,106,255,0.08);}
+.btn-secondary:active{transform:scale(0.97);opacity:0.85;transition:all 0.08s;}
 .hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
 .stat{text-align:center;}
 .stat-num{font-family:var(--font-display);font-size:26px;font-weight:700;}
@@ -1013,8 +1017,8 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
     <h1>Build. Optimize. <em>Get interviews.</em></h1>
     <p class="hero-sub">Upload your resume, get an ATS-style score, fix weak spots with AI, and export a polished PDF or Word resume in the template you choose.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="goToResumeOptimize()">Scan my resume</button>
-      <button class="btn-secondary" onclick="goToResumeBuild()">Build from scratch</button>
+      <button class="btn-primary" onclick="goToResumeOptimize(this)">Scan my resume</button>
+      <button class="btn-secondary" onclick="goToResumeBuild(this)">Build from scratch</button>
     </div>
     <div class="hero-proof">
       <span>No credit card to start</span>
@@ -1059,7 +1063,7 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
       </div>
     </div>
     <div class="resume-band-actions">
-      <button class="btn-primary" onclick="goToResumeOptimize()">Get my resume score</button>
+      <button class="btn-primary" onclick="goToResumeOptimize(this)">Get my resume score</button>
       <button class="btn-secondary" onclick="showPage('resume')">Open resume tools</button>
     </div>
   </div>
@@ -3000,13 +3004,17 @@ function findResumeTab(label) {
   );
 }
 
-function goToResumeBuild() {
+function goToResumeBuild(el) {
+  if (el) { el.classList.add('btn-clicked'); setTimeout(function(){el.classList.remove('btn-clicked');},400); }
+  window.scrollTo({top:0,behavior:'smooth'});
   showPage('resume');
   const btn = findResumeTab('Build Resume');
   if (typeof switchResumeTab === 'function') switchResumeTab('build', btn);
 }
 
-function goToResumeOptimize() {
+function goToResumeOptimize(el) {
+  if (el) { el.classList.add('btn-clicked'); setTimeout(function(){el.classList.remove('btn-clicked');},400); }
+  window.scrollTo({top:0,behavior:'smooth'});
   showPage('resume');
   const btn = findResumeTab('Optimize');
   if (typeof switchResumeTab === 'function') switchResumeTab('optimize', btn);
@@ -4279,6 +4287,13 @@ document.addEventListener('keydown', function(e) {
 
 var _dragExpId = null;
 
+function expDragEnd(event) {
+  _dragExpId = null;
+  document.querySelectorAll('.rb-entry').forEach(function(el) {
+    el.classList.remove('dragging', 'drag-over');
+  });
+}
+
 function expDragStart(event, id) {
   _dragExpId = id;
   event.dataTransfer.effectAllowed = 'move';
@@ -4413,7 +4428,8 @@ function renderExpList() {
         ondragstart="expDragStart(event,'${e.id}')"
         ondragover="expDragOver(event,'${e.id}')"
         ondragleave="expDragLeave(event,'${e.id}')"
-        ondrop="expDrop(event,'${e.id}')">
+        ondrop="expDrop(event,'${e.id}')"
+        ondragend="expDragEnd(event)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <span class="rb-drag-handle" title="Drag to reorder">⠿</span>
         <button class="rb-entry-remove" onclick="removeExperience(${e.id})">✕</button>
@@ -4448,6 +4464,8 @@ function renderExpList() {
         </div>
       </div>
     </div>`).join('');
+  // Re-enable draggable programmatically (browser compat after innerHTML reassignment)
+  el.querySelectorAll('.rb-entry').forEach(function(entry) { entry.draggable = true; });
 }
 
 function renderEduList() {
