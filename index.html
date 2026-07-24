@@ -775,7 +775,7 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 .rb-download-btn{padding:7px 18px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:12px;font-weight:700;font-family:var(--font-display);cursor:pointer;transition:all .2s;}
 .rb-download-btn:hover{background:var(--accent2);}
 .rb-download-btn:disabled{opacity:0.4;cursor:not-allowed;}
-.rb-preview-body{height:560px;min-height:520px;background:#fff;overflow:auto;border-radius:0 0 16px 16px;position:relative;}
+.rb-preview-body{min-height:520px;background:#fff;overflow:auto;border-radius:0 0 16px 16px;position:relative;}
 /* Modern resume style */
 .resume-modern{font-family:'DM Sans',sans-serif;color:#111;max-width:100%;font-size:13px;line-height:1.5;}
 .resume-modern .r-name{font-size:26px;font-weight:700;letter-spacing:-.5px;color:#111;margin-bottom:2px;}
@@ -4451,7 +4451,7 @@ function renderExpList() {
               <button onclick="toggleJobPostInput('${e.id}')" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:var(--success);cursor:pointer;font-family:var(--font-body);">📋 From Job Post</button>
             </div>
           </div>
-          <textarea class="rb-textarea" id="exp-desc-${e.id}" placeholder="Key achievements and responsibilities..." oninput="renderPreview()" style="min-height:55px;">${(e.desc||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+          <textarea class="rb-textarea" id="exp-desc-${e.id}" placeholder="Key achievements and responsibilities..." oninput="autoResizeTA(this);renderPreview()" style="min-height:80px;overflow:hidden;">${(e.desc||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
           <div id="jobpost-panel-${e.id}" style="display:none;margin-top:8px;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.25);border-radius:8px;padding:10px;">
             <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--success);margin-bottom:6px;">📋 Paste the job posting for this role</div>
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4;">AI will turn the job duties into professional resume bullet points — just add your dates and company.</div>
@@ -4466,6 +4466,8 @@ function renderExpList() {
     </div>`).join('');
   // Re-enable draggable programmatically (browser compat after innerHTML reassignment)
   el.querySelectorAll('.rb-entry').forEach(function(entry) { entry.draggable = true; });
+  // Auto-resize all desc textareas to fit saved content
+  el.querySelectorAll('textarea.rb-textarea').forEach(function(ta){autoResizeTA(ta);});
 }
 
 function renderEduList() {
@@ -5672,6 +5674,7 @@ function scheduleGalleryRender() {
   _galleryDebounceTimer = setTimeout(function() { _galleryDebounceTimer = null; renderTemplateGallery(); }, 400);
 }
 
+function autoResizeTA(el){el.style.height="auto";el.style.height=(el.scrollHeight+2)+"px";}
 function renderPreview() {
   try {
     var el = document.getElementById('rb-preview-body');
@@ -5687,10 +5690,16 @@ function renderPreview() {
     if (!frame) {
       frame = document.createElement('iframe');
       frame.className = 'preview-frame';
-      frame.style.cssText = 'width:100%;height:100%;border:none;display:block;min-height:600px;';
+      frame.style.cssText = 'width:100%;border:none;display:block;min-height:800px;';
       el.innerHTML = '';
       el.appendChild(frame);
     }
+    frame.onload = function() {
+      try {
+        var h = frame.contentDocument.body.scrollHeight;
+        if (h > 400) frame.style.height = (h + 20) + 'px';
+      } catch(e) {}
+    };
     frame.srcdoc = buildFrameDoc(resumeHTML, css);
     var overlay = el.querySelector('.preview-overlay');
     if (!hasContent) {
