@@ -5834,7 +5834,6 @@ function loadSavedResumeIntoOptimizer() {
   if (!resume || !resume.data) { showToast('Saved resume not found.'); return; }
   ta.value = buildResumePlainText(resume.data);
   checkOptimizerPlaceholders(ta.value);
-  if (resume.style) { rbStyle = resume.style; renderOptimizeTemplateOptions(); renderTemplateGallery(); }
   optBaselineScore = resume.score || null;
   improvedResumeText = '';
   optSuggestions = [];
@@ -6947,7 +6946,6 @@ function loadSavedResumeIntoBuild() {
   const r = saved.find(s => Number(s.id) === Number(select.value));
   if (!r || !r.data) { showToast('Resume not found.'); return; }
   fillBuilderFromResumeData(r.data);
-  if (r.style) selectStyle(r.style);
   if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b => b.classList.remove('active')); }
   lastResumeScore = r.score || null;
   updateResumeScoreBadge(lastResumeScore);
@@ -7055,7 +7053,6 @@ function loadSavedResume(id) {
     set('edu-school-'+id, e.school); set('edu-degree-'+id, e.degree);
     set('edu-start-'+id, e.start); set('edu-end-'+id, e.end);
   });
-  if (r.style) selectStyle(r.style);
   if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b=>b.classList.remove('active')); }
   renderPreview();
   lastResumeScore = r.score || null;
