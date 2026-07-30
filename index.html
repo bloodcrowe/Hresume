@@ -5605,11 +5605,13 @@ const DEMO_RESUME = {
 
 function getResumePageCSS() {
   try {
-    const styleEl = document.querySelector('style');
-    if (!styleEl) return '';
-    const text = styleEl.textContent;
-    const si = text.indexOf('.resume-modern{');
-    return si >= 0 ? text.slice(si) : '';
+    const styleEls = Array.from(document.querySelectorAll('style'));
+    for (var i = 0; i < styleEls.length; i++) {
+      const text = styleEls[i].textContent;
+      const si = text.indexOf('.resume-modern{');
+      if (si >= 0) return text.slice(si);
+    }
+    return '';
   } catch(e) { return ''; }
 }
 
@@ -5695,10 +5697,14 @@ function renderPreview() {
       el.appendChild(frame);
     }
     frame.onload = function() {
-      try {
-        var h = frame.contentDocument.body.scrollHeight;
-        if (h > 400) frame.style.height = (h + 20) + 'px';
-      } catch(e) {}
+      var resizeFrame = function() {
+        try {
+          var h = frame.contentDocument.body.scrollHeight;
+          if (h > 400) frame.style.height = (h + 20) + 'px';
+        } catch(e) {}
+      };
+      resizeFrame();
+      setTimeout(resizeFrame, 350);
     };
     frame.srcdoc = buildFrameDoc(resumeHTML, css);
     var overlay = el.querySelector('.preview-overlay');
@@ -7848,7 +7854,7 @@ function generateFromJobPost(expId) {
   var sys = 'You are an expert resume writer. Given a job description, write 5-7 clean resume bullet points that someone in this role could use on their resume. Style: direct, believable, recruiter-friendly, and ATS-aware. Prefer separate clear bullets over long combined bullets. Each bullet should cover one main duty, tool, process, or result. Use strong but natural action verbs such as Coordinated, Documented, Supported, Maintained, Reviewed, Communicated, Tracked, Prepared, Assisted, Improved, or Trained. Include relevant keywords from the job, but do not sound inflated or robotic. Keep each bullet 12-22 words when possible. Never fabricate specific numbers, percentages, revenue, team sizes, certifications, employers, or tools not supported by the job text. Return ONLY the bullet points, one per line, each starting with •. No intro text.';
   var msg = (role ? 'Role: ' + role + '\n' : '') + (company ? 'Company: ' + company + '\n' : '') + '\nJob description to convert into resume bullets:\n' + jobPost;
   callAI(msg, sys).then(function(result) {
-    if (descTA) { descTA.value = cleanAIBulletOutput(result); renderPreview(); }
+    if (descTA) { descTA.value = cleanAIBulletOutput(result); autoResizeTA(descTA); renderPreview(); }
     var panel = document.getElementById('jobpost-panel-' + expId);
     if (panel) panel.style.display = 'none';
     showToast('Bullets generated!');
@@ -7890,6 +7896,7 @@ async function aiBulletWriter(expId) {
     const msg = 'Role: ' + role + '\nCompany: ' + company + (existing ? '\nExisting notes or current bullets:\n' + existing : '') + '\n\nRewrite into 5-7 clean, detailed, human-readable resume bullets.';
     const result = await callAI(msg, sys);
     ta.value = cleanAIBulletOutput(result);
+    autoResizeTA(ta);
     renderPreview();
     showToast('Bullets generated!');
   } catch(e) { console.error('aiBulletWriter error:', e); showToast('AI error: ' + (e.message || 'Unknown error. Check console.')); }
