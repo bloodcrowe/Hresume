@@ -6970,6 +6970,7 @@ function loadSavedResumeIntoBuild() {
   if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b => b.classList.remove('active')); }
   lastResumeScore = r.score || null;
   updateResumeScoreBadge(lastResumeScore);
+  renderTemplateGallery();
   renderPreview();
   showToast('Loaded: ' + r.name);
 }
