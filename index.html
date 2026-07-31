@@ -2074,9 +2074,8 @@ function handleAgencyCheckout() {
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;">
         <button class="rb-generate-btn" onclick="downloadResumePDF()">⬇ PDF</button>
-        <button class="rb-generate-btn" onclick="previewResumeDocx()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">⬇ Word (.docx)</button>
       </div>
     </div>
 
@@ -2091,7 +2090,7 @@ function handleAgencyCheckout() {
           <button class="rb-download-btn" onclick="scoreResume()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--muted);">⚡ Score</button>
           <button class="rb-download-btn" id="rb-preview-expand-btn" onclick="toggleResumePreviewExpand()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">Expand</button>
           <button class="rb-download-btn" onclick="downloadResumePDF()">PDF</button>
-          <button class="rb-download-btn" onclick="previewResumeDocx()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">Word</button>
+
         </div>
       </div>
       <div class="rb-preview-body" id="rb-preview-body"></div>
