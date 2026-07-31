@@ -2204,7 +2204,10 @@ function handleAgencyCheckout() {
       <div class="jm-results-panel">
         <div class="jm-results-header">
           <span class="rb-preview-label">Match Analysis</span>
-          <button class="rb-download-btn" id="jmDownloadBtn" onclick="downloadTailoredResume()" style="display:none;">⬇ Tailored Resume PDF</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="rb-download-btn" id="jmCoverLetterBtn" onclick="goToCoverLetterFromJM()" style="display:none;background:var(--surface3);border:1px solid var(--border2);color:var(--text);">✉ Cover Letter</button>
+            <button class="rb-download-btn" id="jmDownloadBtn" onclick="downloadTailoredResume()" style="display:none;">⬇ Tailored Resume PDF</button>
+          </div>
         </div>
         <div class="jm-results-body">
           <div class="opt-empty" id="jmEmpty">
@@ -5815,6 +5818,15 @@ function switchResumeTab(tab, btn) {
   if (tab === 'linkedin') { renderLinkedInLoadOptions(); }
   if (tab === 'myresumes') renderSavedResumes();
   if (tab === 'references') renderRefList();
+  if (tab === 'coverletter') {
+    // Auto-pull resume from builder if field is empty
+    const clResume = document.getElementById('cl-resume');
+    if (clResume && !clResume.value.trim()) clPullFromBuilder();
+    // Auto-import job description from Job Match if available
+    const jmJob = document.getElementById('jmJobText');
+    const clJob = document.getElementById('cl-jobdesc');
+    if (jmJob && clJob && jmJob.value.trim() && !clJob.value.trim()) clJob.value = jmJob.value;
+  }
 }
 
 // ══ OPTIMIZER ══
@@ -6303,6 +6315,11 @@ function clPullFromBuilder() {
   if (data.skills.length) lines.push('\nSKILLS\n' + data.skills.join(', '));
   document.getElementById('cl-resume').value = lines.join('\n');
   showToast('Resume pulled from builder!');
+}
+
+function goToCoverLetterFromJM() {
+  const btn = document.querySelector('.rp-tab[onclick*="coverletter"]');
+  switchResumeTab('coverletter', btn);
 }
 
 async function runCoverLetter() {
@@ -7402,6 +7419,7 @@ function renderJobMatchResults(data) {
     +'</div>'
   ).join('');
   document.getElementById('jmDownloadBtn').style.display = 'block';
+  document.getElementById('jmCoverLetterBtn').style.display = 'block';
   document.getElementById('jmResults').style.display = 'block';
 }
 
