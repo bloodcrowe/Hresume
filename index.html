@@ -4730,7 +4730,12 @@ function buildResumePlainText(data) {
 }
 
 function getResumeExportSpec(style) {
-  const ac = (style === 'tech') ? '#58a6ff' : (style === 'federal' ? '#1a56b0' : (rbAccentColor || '#7c6aff'));
+  const templateAccents = {
+    navy:'#0f2044', executive:'#1a1a2e', slate:'#334155', graduate:'#1a1a2e',
+    elegant:'#2c2c2c', tech:'#58a6ff', federal:'#1a56b0', healthcare:'#0d6e8a',
+    harvard:'#a51c30', impact:'#1a1a2e', classic:'#17365d', classic2:'#17365d'
+  };
+  const ac = templateAccents[style] || rbAccentColor || '#7c6aff';
   const base = {
     accent: ac,
     font: 'helvetica',
@@ -7551,50 +7556,101 @@ async function downloadResumeDOCX() {
     return `<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblBorders><w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/></w:tblBorders></w:tblPr>${rows.join('')}</w:tbl><w:p><w:pPr><w:spacing w:after="100"/></w:pPr></w:p>`;
   };
 
+
   const body = [];
-  // Header
-  body.push(para(data.name, {bold:true, size:52, color:accent, after:60}));
-  if (data.title) body.push(para(data.title, {italic:true, size:24, color:'444444', after:60}));
-  const contact = [data.email, data.phone, data.location, data.website].filter(Boolean).join('  |  ');
-  if (contact) body.push(para(contact, {size:19, color:'666666', after:0}));
-  body.push(`<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="12" w:space="4" w:color="${accent}"/></w:pBdr><w:spacing w:before="80" w:after="180"/></w:pPr></w:p>`);
 
-  const renderSummary = () => {
-    if (!data.summary) return;
-    body.push(section(spec.summaryLabel));
-    body.push(para(cleanResumeSentenceSpacing(data.summary), {size:21, color:'333333', after:160}));
-  };
-  const renderSkills = () => {
+  // ── NAVY: dark left sidebar + white right column ──
+  if (rbStyle === 'navy') {
+    const nb = '0F2044';
+    const wp = (txt, sz, col, bold, after) =>
+      `<w:p><w:pPr><w:spacing w:after="${after||50}"/></w:pPr><w:r><w:rPr>${bold?'<w:b/>':''}<w:color w:val="${col}"/><w:sz w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${esc(txt)}</w:t></w:r></w:p>`;
+    const divider = `<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="3A5280"/></w:pBdr><w:spacing w:before="140" w:after="100"/></w:pPr></w:p>`;
+    const sideLabel = (t) => wp(t, 17, '7A9ABF', true, 60);
+
+    const left = [];
+    left.push(wp(data.name, 34, 'FFFFFF', true, 80));
+    if (data.title) left.push(wp(data.title, 19, 'A0BDD8', false, 100));
+    const cLines = [data.email, data.phone, data.location, data.website].filter(Boolean);
+    if (cLines.length) { left.push(divider); cLines.forEach(c => left.push(wp(c, 17, '8AA5BF', false, 36))); }
+    if (data.summary) { left.push(divider); left.push(sideLabel('SUMMARY')); left.push(wp(data.summary, 17, 'BFCFDE', false, 50)); }
     const skills = getResumeSkillLines(data.skills);
-    if (!skills.length) return;
-    body.push(section(spec.skillsLabel));
-    body.push(skillsTable(skills));
-  };
-  const renderExperience = () => {
-    const experiences = data.experiences.filter(e => e.company || e.role || e.desc);
-    if (!experiences.length) return;
-    body.push(section(spec.experienceLabel));
-    experiences.forEach(e => {
-      const dates = [e.start, e.end].filter(Boolean).join(' – ');
-      body.push(expHeader(e.company, dates));
-      if (e.role) body.push(para(e.role, {italic:true, size:21, color:accent, after:60}));
-      const bullets = getResumeBulletLines(e.desc);
-      bullets.forEach((l, bi) => body.push(para('• ' + l, {size:21, color:'222222', indent:280, hanging:200, after: bi===bullets.length-1 ? 100 : 40})));
-    });
-  };
-  const renderEducation = () => {
-    const educations = data.educations.filter(e => e.school || e.degree);
-    if (!educations.length) return;
-    body.push(section(spec.educationLabel));
-    educations.forEach(e => {
-      const dates = [e.start, e.end].filter(Boolean).join(' – ');
-      body.push(expHeader(e.school, dates));
-      if (e.degree) body.push(para(e.degree, {italic:true, size:21, color:accent, after:120}));
-    });
-  };
+    if (skills.length) { left.push(divider); left.push(sideLabel('SKILLS')); skills.forEach(s => left.push(wp('• ' + s, 17, 'BFCFDE', false, 28))); }
 
-  const renderers = {summary:renderSummary, skills:renderSkills, experience:renderExperience, education:renderEducation};
-  spec.order.forEach(part => renderers[part]?.());
+    const right = [];
+    const rsec = (t) => `<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="4" w:color="${nb}"/></w:pBdr><w:spacing w:before="200" w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:caps/><w:color w:val="${nb}"/><w:sz w:val="22"/></w:rPr><w:t>${esc(t)}</w:t></w:r></w:p>`;
+    const exps = data.experiences.filter(e => e.company || e.role);
+    if (exps.length) {
+      right.push(rsec('Experience'));
+      exps.forEach(e => {
+        const dates = [e.start, e.end].filter(Boolean).join(' – ');
+        right.push(`<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="5760"/></w:tabs><w:spacing w:before="100" w:after="36"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="111111"/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">${esc(e.company)}</w:t></w:r><w:r><w:rPr><w:color w:val="666666"/><w:sz w:val="19"/></w:rPr><w:t xml:space="preserve">&#9;${esc(dates)}</w:t></w:r></w:p>`);
+        if (e.role) right.push(wp(e.role, 20, nb, false, 50));
+        getResumeBulletLines(e.desc).forEach((l,bi,arr) => right.push(`<w:p><w:pPr><w:ind w:left="240" w:hanging="200"/><w:spacing w:after="${bi===arr.length-1?90:30}"/></w:pPr><w:r><w:rPr><w:color w:val="222222"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">• ${esc(l)}</w:t></w:r></w:p>`));
+      });
+    }
+    const edus = data.educations.filter(e => e.school || e.degree);
+    if (edus.length) {
+      right.push(rsec('Education'));
+      edus.forEach(e => {
+        const dates = [e.start, e.end].filter(Boolean).join(' – ');
+        right.push(wp(e.school, 22, '111111', true, 36));
+        if (e.degree) right.push(wp(e.degree, 20, nb, false, 30));
+        if (dates) right.push(wp(dates, 18, '888888', false, 80));
+      });
+    }
+
+    const tcl = (w, fill, mar, content) => `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${fill?`<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>`:''}${mar||''}</w:tcPr>${content}</w:tc>`;
+    const lmar = '<w:tcMar><w:top w:w="300" w:type="dxa"/><w:left w:w="280" w:type="dxa"/><w:bottom w:w="300" w:type="dxa"/><w:right w:w="220" w:type="dxa"/></w:tcMar>';
+    const rmar = '<w:tcMar><w:top w:w="300" w:type="dxa"/><w:left w:w="280" w:type="dxa"/><w:bottom w:w="300" w:type="dxa"/><w:right w:w="220" w:type="dxa"/></w:tcMar>';
+    const tblBdr = '<w:tblBorders><w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/></w:tblBorders>';
+    body.push(`<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/>${tblBdr}</w:tblPr><w:tr>${tcl(3060,nb,lmar,left.join(''))}${tcl(6300,null,rmar,right.join(''))}</w:tr></w:tbl>`);
+
+  } else {
+    // Header (all non-navy templates)
+    body.push(para(data.name, {bold:true, size:52, color:accent, after:60}));
+    if (data.title) body.push(para(data.title, {italic:true, size:24, color:'444444', after:60}));
+    const contact = [data.email, data.phone, data.location, data.website].filter(Boolean).join('  |  ');
+    if (contact) body.push(para(contact, {size:19, color:'666666', after:0}));
+    body.push(`<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="12" w:space="4" w:color="${accent}"/></w:pBdr><w:spacing w:before="80" w:after="180"/></w:pPr></w:p>`);
+
+    const renderSummary = () => {
+      if (!data.summary) return;
+      body.push(section(spec.summaryLabel));
+      body.push(para(cleanResumeSentenceSpacing(data.summary), {size:21, color:'333333', after:160}));
+    };
+    const renderSkills = () => {
+      const skills = getResumeSkillLines(data.skills);
+      if (!skills.length) return;
+      body.push(section(spec.skillsLabel));
+      body.push(skillsTable(skills));
+    };
+    const renderExperience = () => {
+      const experiences = data.experiences.filter(e => e.company || e.role || e.desc);
+      if (!experiences.length) return;
+      body.push(section(spec.experienceLabel));
+      experiences.forEach(e => {
+        const dates = [e.start, e.end].filter(Boolean).join(' – ');
+        body.push(expHeader(e.company, dates));
+        if (e.role) body.push(para(e.role, {italic:true, size:21, color:accent, after:60}));
+        const bullets = getResumeBulletLines(e.desc);
+        bullets.forEach((l, bi) => body.push(para('• ' + l, {size:21, color:'222222', indent:280, hanging:200, after: bi===bullets.length-1 ? 100 : 40})));
+      });
+    };
+    const renderEducation = () => {
+      const educations = data.educations.filter(e => e.school || e.degree);
+      if (!educations.length) return;
+      body.push(section(spec.educationLabel));
+      educations.forEach(e => {
+        const dates = [e.start, e.end].filter(Boolean).join(' – ');
+        body.push(expHeader(e.school, dates));
+        if (e.degree) body.push(para(e.degree, {italic:true, size:21, color:accent, after:120}));
+      });
+    };
+
+    const renderers = {summary:renderSummary, skills:renderSkills, experience:renderExperience, education:renderEducation};
+    spec.order.forEach(part => renderers[part]?.());
+  }
+
 
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body.join('')}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="864" w:right="864" w:bottom="864" w:left="864" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr></w:body></w:document>`;
   const zip = new JSZip();
