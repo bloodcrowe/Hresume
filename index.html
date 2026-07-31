@@ -7514,54 +7514,72 @@ async function downloadResumeDOCX() {
   if (rbStyle === 'classic') { await downloadClassicResumeDOCX(data); return; }
 
   const esc = (v) => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const spec = getResumeExportSpec(rbStyle);
+  const accent = String(spec.accent || '#7c6aff').replace('#','').toUpperCase();
+
   const para = (text, opts = {}) => {
     const size = opts.size || 22;
     const color = opts.color || '111111';
     const bold = opts.bold ? '<w:b/>' : '';
     const italic = opts.italic ? '<w:i/>' : '';
-    const spacing = opts.after == null ? 80 : opts.after;
-    const indent = opts.indent ? `<w:ind w:left="${opts.indent}"/>` : '';
-    return `<w:p><w:pPr><w:spacing w:after="${spacing}"/>${indent}</w:pPr><w:r><w:rPr>${bold}${italic}<w:color w:val="${color}"/><w:sz w:val="${size}"/></w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`;
+    const caps = opts.caps ? '<w:caps/>' : '';
+    const sa = opts.after == null ? 80 : opts.after;
+    const sb = opts.before || 0;
+    const ind = opts.indent ? `<w:ind w:left="${opts.indent}" w:hanging="${opts.hanging||0}"/>` : '';
+    const bdr = opts.border ? `<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="4" w:color="${accent}"/></w:pBdr>` : '';
+    return `<w:p><w:pPr><w:spacing w:before="${sb}" w:after="${sa}"/>${ind}${bdr}</w:pPr><w:r><w:rPr>${bold}${italic}${caps}<w:color w:val="${color}"/><w:sz w:val="${size}"/></w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`;
   };
-  const spec = getResumeExportSpec(rbStyle);
-  const accent = String(spec.accent || '#7c6aff').replace('#','').toUpperCase();
-  const section = (title) => para(title, {bold:true, size:22, color:accent, after:60});
+
+  const section = (title) =>
+    `<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="4" w:color="${accent}"/></w:pBdr><w:spacing w:before="260" w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:caps/><w:color w:val="${accent}"/><w:sz w:val="22"/></w:rPr><w:t>${esc(title)}</w:t></w:r></w:p>`;
+
+  const expHeader = (company, dates) => {
+    const dateRun = dates ? `<w:r><w:rPr><w:color w:val="666666"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">&#9;​${esc(dates)}</w:t></w:r>` : '';
+    return `<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="9360"/></w:tabs><w:spacing w:before="160" w:after="40"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="111111"/><w:sz w:val="23"/></w:rPr><w:t xml:space="preserve">${esc(company)}</w:t></w:r>${dateRun}</w:p>`;
+  };
+
+  const skillsTable = (skills) => {
+    const half = Math.ceil(skills.length / 2);
+    const col1 = skills.slice(0, half);
+    const col2 = skills.slice(half);
+    const rows = Array.from({length: Math.max(col1.length, col2.length)}, (_, i) => {
+      const s1 = col1[i] ? '► ' + esc(col1[i]) : '';
+      const s2 = col2[i] ? '► ' + esc(col2[i]) : '';
+      const cell = (txt) => `<w:tc><w:tcPr><w:tcW w:w="4680" w:type="dxa"/><w:tcBorders><w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/></w:tcBorders></w:tcPr><w:p><w:pPr><w:spacing w:after="40"/></w:pPr><w:r><w:rPr><w:color w:val="333333"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">${txt}</w:t></w:r></w:p></w:tc>`;
+      return `<w:tr>${cell(s1)}${cell(s2)}</w:tr>`;
+    });
+    return `<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblBorders><w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/></w:tblBorders></w:tblPr>${rows.join('')}</w:tbl><w:p><w:pPr><w:spacing w:after="100"/></w:pPr></w:p>`;
+  };
 
   const body = [];
-  body.push(para(data.name, {bold:true, size:36, color: ['dark','navy','impact','federal'].includes(spec.header) ? accent : '111111', after:40}));
-  if (data.title) body.push(para(data.title, {size:24, color:accent, after:40}));
-  const contact = [data.email, data.phone, data.location, data.website].filter(Boolean).join(' | ');
-  if (contact) body.push(para(contact, {size:20, color:'555555', after:160}));
+  // Header
+  body.push(para(data.name, {bold:true, size:52, color:accent, after:60}));
+  if (data.title) body.push(para(data.title, {italic:true, size:24, color:'444444', after:60}));
+  const contact = [data.email, data.phone, data.location, data.website].filter(Boolean).join('  |  ');
+  if (contact) body.push(para(contact, {size:19, color:'666666', after:0}));
+  body.push(`<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="12" w:space="4" w:color="${accent}"/></w:pBdr><w:spacing w:before="80" w:after="180"/></w:pPr></w:p>`);
 
   const renderSummary = () => {
     if (!data.summary) return;
     body.push(section(spec.summaryLabel));
-    body.push(para(cleanResumeSentenceSpacing(data.summary), {size:22, color:'333333', after:140}));
+    body.push(para(cleanResumeSentenceSpacing(data.summary), {size:21, color:'333333', after:160}));
   };
   const renderSkills = () => {
     const skills = getResumeSkillLines(data.skills);
     if (!skills.length) return;
     body.push(section(spec.skillsLabel));
-    if (spec.skillsMode === 'list') skills.forEach(s => body.push(para('- ' + s, {size:22, color:'333333', after:30})));
-    else body.push(para(skills.join(' | '), {size:22, color:'333333', after:80}));
+    body.push(skillsTable(skills));
   };
   const renderExperience = () => {
     const experiences = data.experiences.filter(e => e.company || e.role || e.desc);
     if (!experiences.length) return;
     body.push(section(spec.experienceLabel));
-    experiences.forEach((e, expIndex) => {
-      const dates = [e.start, e.end].filter(Boolean).join(' - ');
-      const title = rbStyle === 'ats'
-        ? [e.company, dates].filter(Boolean).join(' | ')
-        : [e.company, e.role].filter(Boolean).join(' - ') + (dates && rbStyle !== 'harvard' ? ' | ' + dates : '');
-      if (title) body.push(para(title, {bold:true, size:22, color: rbStyle === 'tech' ? '58A6FF' : '111111', after:40}));
-      if (rbStyle === 'harvard' && dates) body.push(para(dates, {size:20, color:'555555', after:30}));
+    experiences.forEach(e => {
+      const dates = [e.start, e.end].filter(Boolean).join(' – ');
+      body.push(expHeader(e.company, dates));
+      if (e.role) body.push(para(e.role, {italic:true, size:21, color:accent, after:60}));
       const bullets = getResumeBulletLines(e.desc);
-      bullets.forEach((l, bulletIndex) => {
-        const isLastBullet = bulletIndex === bullets.length - 1;
-        body.push(para('• ' + l, {size:21, color:'333333', indent:240, after:isLastBullet ? 120 : 40}));
-      });
-      if (!bullets.length && expIndex < experiences.length - 1) body.push(para('', {size:4, after:120}));
+      bullets.forEach((l, bi) => body.push(para('• ' + l, {size:21, color:'222222', indent:280, hanging:200, after: bi===bullets.length-1 ? 100 : 40})));
     });
   };
   const renderEducation = () => {
@@ -7569,30 +7587,27 @@ async function downloadResumeDOCX() {
     if (!educations.length) return;
     body.push(section(spec.educationLabel));
     educations.forEach(e => {
-      const dates = [e.start, e.end].filter(Boolean).join(' - ');
-      body.push(para([e.degree, e.school].filter(Boolean).join(' - ') + (dates ? ' | ' + dates : ''), {size:22, after:80}));
+      const dates = [e.start, e.end].filter(Boolean).join(' – ');
+      body.push(expHeader(e.school, dates));
+      if (e.degree) body.push(para(e.degree, {italic:true, size:21, color:accent, after:120}));
     });
   };
+
   const renderers = {summary:renderSummary, skills:renderSkills, experience:renderExperience, education:renderEducation};
   spec.order.forEach(part => renderers[part]?.());
 
-  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body.join('')}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr></w:body></w:document>`;
-
+  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body.join('')}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="864" w:right="864" w:bottom="864" w:left="864" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr></w:body></w:document>`;
   const zip = new JSZip();
   zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
   zip.folder('_rels').file('.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
   zip.folder('word').file('document.xml', documentXml);
   zip.folder('word').folder('_rels').file('document.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`);
-
   const blob = await zip.generateAsync({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = data.name.replace(/\s+/g,'-') + '-Resume.docx';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('Word document downloaded!');
 }
