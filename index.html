@@ -2075,7 +2075,7 @@ function handleAgencyCheckout() {
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <button class="rb-generate-btn" onclick="downloadResumePDF()">⬇ PDF</button>
-        <button class="rb-generate-btn" onclick="downloadResumeDOCX()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">⬇ Word (.docx)</button>
+        <button class="rb-generate-btn" onclick="previewResumeDocx()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">⬇ Word (.docx)</button>
       </div>
     </div>
 
@@ -2090,7 +2090,7 @@ function handleAgencyCheckout() {
           <button class="rb-download-btn" onclick="scoreResume()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--muted);">⚡ Score</button>
           <button class="rb-download-btn" id="rb-preview-expand-btn" onclick="toggleResumePreviewExpand()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">Expand</button>
           <button class="rb-download-btn" onclick="downloadResumePDF()">PDF</button>
-          <button class="rb-download-btn" onclick="downloadResumeDOCX()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">Word</button>
+          <button class="rb-download-btn" onclick="previewResumeDocx()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);">Word</button>
         </div>
       </div>
       <div class="rb-preview-body" id="rb-preview-body"></div>
@@ -5731,6 +5731,26 @@ function downloadResumePDF() {
   if (rbStyle === 'classic') { exportClassicResumePDF(data); return; }
   // For all styled templates, print the actual rendered HTML so the PDF matches the preview exactly
   printStyledResumePDF(data);
+}
+
+function previewResumeDocx() {
+  const data = getResumeData();
+  if (!data.name) { showToast('Add your name first.'); return; }
+  if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
+  const resumeHTML = buildResumeHTML(data, rbStyle);
+  const css = getResumePageCSS();
+  const toolbar = '<div style="position:fixed;top:0;left:0;right:0;background:#1a1a2e;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.5);">'
+    + '<span style="color:#fff;font-family:sans-serif;font-size:13px;">Word Preview — <span style="opacity:0.65;font-size:12px;">Word files use simplified styling; download PDF for the exact look.</span></span>'
+    + '<div style="display:flex;gap:10px;">'
+    + '<button onclick="window.opener.downloadResumeDOCX();setTimeout(()=>window.close(),400);" style="background:#7c6aff;color:#fff;border:none;padding:9px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;">&#11015; Download Word</button>'
+    + '<button onclick="window.close();" style="background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:9px 14px;border-radius:8px;cursor:pointer;font-size:14px;">Close</button>'
+    + '</div></div>';
+  const pageContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' + css + 'body{margin:0;padding:0;background:#f0f0f0;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}</style></head><body>' + toolbar + '<div style="padding-top:64px;">' + resumeHTML + '</div></body></html>';
+  const win = window.open('', '_blank', 'width=900,height=1100');
+  if (!win) { showToast('Pop-up blocked — allow pop-ups for this site.'); return; }
+  win.document.open();
+  win.document.write(pageContent);
+  win.document.close();
 }
 
 function printStyledResumePDF(data) {
