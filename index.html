@@ -6974,6 +6974,7 @@ function loadSavedResumeIntoBuild() {
   if (!r || !r.data) { showToast('Resume not found.'); return; }
   fillBuilderFromResumeData(r.data);
   if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b => b.classList.remove('active')); }
+  if (r.style) { rbStyle = r.style; }
   lastResumeScore = r.score || null;
   updateResumeScoreBadge(lastResumeScore);
   renderTemplateGallery();
@@ -7105,6 +7106,7 @@ function loadSavedResume(id) {
     set('edu-start-'+id, e.start); set('edu-end-'+id, e.end);
   });
   if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b=>b.classList.remove('active')); }
+  if (r.style) { rbStyle = r.style; }
   renderTemplateGallery();
   renderPreview();
   lastResumeScore = r.score || null;
