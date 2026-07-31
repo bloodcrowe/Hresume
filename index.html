@@ -7541,7 +7541,7 @@ async function downloadResumeDOCX() {
   if (!data.name) { showToast('Add your name first.'); return; }
   if (hasUnresolvedNumberPlaceholders(buildResumePlainText(data))) { showToast('Fill in all X/Y/Z or bracket placeholder details before downloading.'); return; }
   if (typeof JSZip === 'undefined') { showToast('Word export library is still loading. Try again in a moment.'); return; }
-  if (rbStyle === 'classic') { await downloadClassicResumeDOCX(data); return; }
+  if (rbStyle === 'classic' || rbStyle === 'classic2') { await downloadClassicResumeDOCX(data); return; }
 
   const esc = (v) => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const spec = getResumeExportSpec(rbStyle);
