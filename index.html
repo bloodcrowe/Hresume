@@ -5269,14 +5269,14 @@ function buildResumeHTML(data, style) {
   }
   // ── NAVY ──
   if(style==='navy') {
-    var left2 = '<div style="background:#0f2044;padding:24px 18px;color:#fff;min-width:0;">'+
+    var left2 = '<div style="background:#0f2044;padding:24px 18px;color:#fff;width:220px;min-width:220px;max-width:220px;word-wrap:break-word;overflow-wrap:break-word;">'+
       (data.name?'<div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;">'+data.name+'</div>':'')+
       (data.title?'<div style="font-size:12px;color:rgba(255,255,255,.65);margin-bottom:16px;letter-spacing:.5px;">'+data.title+'</div>':'')+
       (contact.length?'<div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.8;margin-bottom:16px;">'+contact.join('<br>')+'</div>':'')+
       (data.summary?'<div style="font-size:11px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:16px;border-top:1px solid rgba(255,255,255,.15);padding-top:16px;">'+data.summary+'</div>':'')+
       (data.skills.length?'<div style="border-top:1px solid rgba(255,255,255,.15);padding-top:14px;"><div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">Skills</div>'+data.skills.map(function(s){return'<div style="font-size:11px;color:rgba(255,255,255,.7);padding:3px 0;">'+s+'</div>';}).join('')+'</div>':'')+
       '</div>';
-    var right2 = '<div style="padding:24px 20px;flex:1;min-width:0;">'+sec('Experience',mkExp())+sec('Education',mkEdu())+'</div>';
+    var right2 = '<div style="padding:24px 20px;flex:1;min-width:0;overflow:hidden;">'+sec('Experience',mkExp())+sec('Education',mkEdu())+'</div>';
     return colorStyle+'<div class="'+cls+'" style="display:flex;gap:0;min-height:100%;">'+left2+right2+'</div>';
   }
   // ── ELEGANT ──
