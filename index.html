@@ -768,10 +768,9 @@ body.light{--bg:#f4f4f8;--surface:#fff;--surface2:#f0eff8;--surface3:#e8e7f4;--b
 .rb-preview-panel{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:auto;position:sticky;top:80px;resize:both;min-width:380px;min-height:620px;max-width:min(760px,80vw);max-height:calc(100vh - 96px);}
 .rb-preview-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .rb-preview-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
-.rb-preview-panel.is-expanded{position:fixed;inset:24px;z-index:900;max-width:none;max-height:none;min-width:0;min-height:0;resize:none;box-shadow:0 30px 90px rgba(0,0,0,.55);}
-.rb-preview-panel.is-expanded .rb-preview-body{height:calc(100vh - 116px);min-height:0;}
+.rb-preview-panel.is-expanded{width:min(760px,80vw)!important;height:calc(100vh - 96px)!important;max-width:min(760px,80vw);max-height:calc(100vh - 96px);}
+.rb-preview-panel.is-expanded .rb-preview-body{height:calc(100vh - 152px);min-height:0;}
 .rb-preview-panel.is-expanded .preview-frame{min-height:100%!important;}
-.rb-preview-panel.is-expanded::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:-1;}
 .rb-download-btn{padding:7px 18px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:12px;font-weight:700;font-family:var(--font-display);cursor:pointer;transition:all .2s;}
 .rb-download-btn:hover{background:var(--accent2);}
 .rb-download-btn:disabled{opacity:0.4;cursor:not-allowed;}
@@ -4277,8 +4276,7 @@ function toggleResumePreviewExpand(force) {
   if (!panel) return;
   const shouldExpand = force === undefined ? !panel.classList.contains('is-expanded') : !!force;
   panel.classList.toggle('is-expanded', shouldExpand);
-  if (btn) btn.textContent = shouldExpand ? 'Close' : 'Expand';
-  document.body.style.overflow = shouldExpand ? 'hidden' : '';
+  if (btn) btn.textContent = shouldExpand ? 'Collapse' : 'Expand';
 }
 
 document.addEventListener('keydown', function(e) {
