@@ -1940,6 +1940,7 @@ function handleAgencyCheckout() {
           <option value="">Load from My Resumes...</option>
         </select>
         <button class="rb-download-btn" onclick="loadSavedResumeIntoBuild()" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);white-space:nowrap;">Load</button>
+        <button class="rb-download-btn" onclick="quickSaveBuildResume()" style="background:var(--accent);border:none;color:#fff;white-space:nowrap;" title="Save resume + current template">Save</button>
       </div>
 
       <!-- Personal Info -->
@@ -7021,6 +7022,29 @@ function loadSavedResumeIntoJobMatch() {
   const ta = document.getElementById('jmResumeText');
   if (ta) ta.value = buildResumePlainText(r.data);
   showToast('Loaded: ' + r.name);
+}
+
+function quickSaveBuildResume() {
+  const data = getResumeData();
+  if (!data.name) { showToast('Add your name before saving.'); return; }
+  const select = document.getElementById('buildLoadSelect');
+  const id = select ? Number(select.value) : 0;
+  const saved = getSavedResumes();
+  const tplLabel = (TEMPLATE_STYLES.find(function(t){return t.key===rbStyle;})||{}).label || rbStyle;
+  if (id) {
+    const idx = saved.findIndex(function(s){ return Number(s.id) === id; });
+    if (idx >= 0) {
+      saved[idx] = Object.assign({}, saved[idx], { data: data, style: rbStyle, color: rbAccentColor, savedAt: new Date().toLocaleDateString(), score: lastResumeScore });
+      setSavedResumes(saved);
+      renderSavedResumes();
+      renderOptimizerSavedResumeOptions();
+      renderBuildLoadOptions();
+      showToast('Saved — ' + saved[idx].name + ' [' + tplLabel + ']');
+      return;
+    }
+  }
+  // No resume selected — open save modal to name it
+  saveCurrentResume();
 }
 
 function saveCurrentResume() {
