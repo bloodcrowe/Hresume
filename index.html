@@ -5812,7 +5812,7 @@ function switchResumeTab(tab, btn) {
     const jmText = document.getElementById('jmResumeText');
     if (optText && jmText && !jmText.value) jmText.value = optText;
   }
-  if (tab === 'build') { renderPreview(); renderBuildLoadOptions(); }
+  if (tab === 'build') { renderPreview(); renderBuildLoadOptions(); renderTemplateGallery(); }
   if (tab === 'optimize') { renderOptimizerSavedResumeOptions(); checkOptimizerPlaceholders(); }
   if (tab === 'jobmatch') { renderJobMatchLoadOptions(); }
   if (tab === 'linkedin') { renderLinkedInLoadOptions(); }
@@ -7105,6 +7105,7 @@ function loadSavedResume(id) {
     set('edu-start-'+id, e.start); set('edu-end-'+id, e.end);
   });
   if (r.color) { rbAccentColor = r.color; document.querySelectorAll('.rb-color-swatch').forEach(b=>b.classList.remove('active')); }
+  renderTemplateGallery();
   renderPreview();
   lastResumeScore = r.score || null;
   updateResumeScoreBadge(lastResumeScore);
