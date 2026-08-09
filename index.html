@@ -4782,10 +4782,11 @@ function exportTemplateResumePDF(data) {
   if (!window.jspdf?.jsPDF) { showToast('PDF library is still loading. Try again in a moment.'); return; }
   const { jsPDF } = window.jspdf;
   const spec = getResumeExportSpec(rbStyle);
-  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginL = 50, marginR = 50, marginT = 48, marginB = 48;
+  drawResumePrintSafeBorder(doc);
+  const marginL = 64, marginR = 64, marginT = 64, marginB = 64;
   const maxWidth = pageWidth - marginL - marginR;
   const hexToRgb = h => {
     h = String(h || '#7c6aff').replace('#','');
@@ -4795,7 +4796,8 @@ function exportTemplateResumePDF(data) {
   const accent = hexToRgb(spec.accent);
   const font = spec.font === 'times' ? 'times' : spec.font === 'courier' ? 'courier' : 'helvetica';
   let y = marginT;
-  const checkY = h => { if (y + h > pageHeight - marginB) { doc.addPage(); y = marginT; } };
+  const addPage = () => { doc.addPage(); drawResumePrintSafeBorder(doc); y = marginT; };
+  const checkY = h => { if (y + h > pageHeight - marginB) addPage(); };
   const text = (value, opts = {}) => {
     const size = opts.size || 10.5;
     const lineH = opts.lineH || size * 1.3;
@@ -4875,15 +4877,17 @@ function exportTemplateResumePDF(data) {
 function exportClassicResumePDF(data) {
   if (!window.jspdf?.jsPDF) { showToast('PDF library is still loading. Try again in a moment.'); return; }
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginL = 58, marginR = 58, marginT = 42, marginB = 48;
+  drawResumePrintSafeBorder(doc);
+  const marginL = 66, marginR = 66, marginT = 64, marginB = 64;
   const maxWidth = pageWidth - marginL - marginR;
   const blue = [79,129,189], headingBlue = [54,96,145], titleBlue = [23,54,93];
   let y = marginT;
 
-  const checkY = h => { if (y + h > pageHeight - marginB) { doc.addPage(); y = marginT; } };
+  const addPage = () => { doc.addPage(); drawResumePrintSafeBorder(doc); y = marginT; };
+  const checkY = h => { if (y + h > pageHeight - marginB) addPage(); };
   const addWrapped = (text, opts = {}) => {
     const size = opts.size || 10.5;
     const lineH = opts.lineH || size * 1.25;
@@ -5630,6 +5634,50 @@ function buildFrameDoc(htmlBody, extraCSS) {
     + '</head><body>' + htmlBody + '</body></html>';
 }
 
+function drawResumePrintSafeBorder(doc) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const inset = 24;
+  doc.setDrawColor(185, 185, 190);
+  doc.setLineWidth(0.6);
+  doc.rect(inset, inset, pageWidth - inset * 2, pageHeight - inset * 2);
+}
+
+function getPrintSafeResumeCSS() {
+  return `
+@page{margin:0.3in;size:letter;}
+body{margin:0;padding:0;background:#fff;}
+.print-safe-page{
+  width:100%;
+  min-height:10.35in;
+  border:1px solid #cfcfd6;
+  padding:0.24in;
+  box-sizing:border-box;
+  background:#fff;
+}
+.print-safe-page > *{max-width:100%;}
+.print-safe-border{display:none;}
+@media print{
+  body{margin:0;}
+  .print-safe-page{
+    border:0;
+    break-after:auto;
+    page-break-after:auto;
+  }
+  .print-safe-border{
+    display:block;
+    position:fixed;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+    border:1px solid #cfcfd6;
+    pointer-events:none;
+  }
+  .resume-builder-preview,.rb-preview-container,.page-resume-wrap{display:block!important;}
+}`;
+}
+
 function renderTemplateGallery() {
   try {
     const gallery = document.getElementById('rb-template-gallery');
@@ -5766,14 +5814,9 @@ function printStyledResumePDF(data) {
 <style>
 ${css}
 *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
-@page{margin:0;size:letter;}
-body{margin:0;padding:0;background:#fff;}
-@media print{
-  body{margin:0;}
-  .resume-builder-preview,.rb-preview-container,.page-resume-wrap{display:block!important;}
-}
+${getPrintSafeResumeCSS()}
 </style>
-</head><body>${resumeHTML}</body></html>`;
+</head><body><div class="print-safe-border"></div><div class="print-safe-page">${resumeHTML}</div></body></html>`;
   const win = window.open('', '_blank', 'width=900,height=1100');
   if (!win) { showToast('Pop-up blocked — allow pop-ups for this site to download PDF.'); return; }
   win.document.open();
@@ -7211,14 +7254,15 @@ function selectBulletStyle(btn, section) {
 function exportStyledResumePDF(text, filename) {
   if (!window.jspdf?.jsPDF) { showToast('PDF library is still loading. Try again in a moment.'); return; }
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginL = 50, marginR = 50, marginT = 50, marginB = 50;
+  drawResumePrintSafeBorder(doc);
+  const marginL = 64, marginR = 64, marginT = 64, marginB = 64;
   const maxWidth = pageWidth - marginL - marginR;
   let y = marginT;
 
-  const addPage = () => { doc.addPage(); y = marginT; };
+  const addPage = () => { doc.addPage(); drawResumePrintSafeBorder(doc); y = marginT; };
   const checkY = (h) => { if (y + h > pageHeight - marginB) addPage(); };
   const isBulletLine = (line) => /^[\u2022\u2013\-\*]\s+/.test(line) || /^\d+\.\s+/.test(line);
   const stripBullet = (line) => line.replace(/^[\u2022\u2013\-\*]\s+/, '').replace(/^\d+\.\s+/, '');
